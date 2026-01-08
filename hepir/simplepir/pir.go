@@ -1,0 +1,21 @@
+package simplepir
+
+import (
+	utils "github.com/local/utils"
+)
+
+type HEPIR interface {
+	// 基础配置
+	InitParams(N, perEntry uint64) Params
+	Name() string
+
+	MakeInternalDB(db *utils.EncodedDB) *InternalDB
+
+	Setup(DB *InternalDB) (State, State)
+
+	Query(indexes []uint64) (Msg, State)
+
+	Answer(DB *InternalDB, queries Msg, serverHint State) Msg
+
+	Reconstruct(indexes []uint64, clientHint State, query Msg, answer Msg, clientState State) [][]uint64
+}

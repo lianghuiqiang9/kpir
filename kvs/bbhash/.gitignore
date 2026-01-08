@@ -1,0 +1,13 @@
+# 过滤 C++ 编译生成的二进制程序
+BBHash/Bootest
+BBHash/example
+BBHash/example_custom_hash
+
+# 过滤动态库和静态库
+*.so
+*.a
+*.o
+*.dylib
+
+# 过滤 Go 测试产生的临时文件
+*.test
