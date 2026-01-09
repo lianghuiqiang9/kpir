@@ -18,16 +18,15 @@ bash build_pthash.sh
 
 cd ..
 cd ./consensusrecsplit/
-
 bash build_consensusrecsplit.sh
 
 # run
 
 cd ..
 cd ..
+go run main.go
 
 cd kvs
-
 bash kvs_benchmark.sh
 
 cd ..

@@ -9,8 +9,9 @@ import (
 
 func main() {
 	kv := &utils.KV{}
-	kv.Setup(1<<20, 96)
+	kv.Setup(1<<20, 32)
 	kv.Random()
+	kv.Sort()
 
 	kvs := kvs.BBHash2KVS{} //BFFKVS{}
 	db := kvs.Encode(kv)
