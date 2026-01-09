@@ -10,16 +10,16 @@ import (
 )
 
 var (
-	logNumEntries  uint64
-	uint64PerEntry uint64
-	batchSize      uint64
-	batchtype      string
-	sipirID        string // piano 0, singlepass 1, singleserver 2
+	logNumEntries uint64
+	bitsPerVal    uint64
+	batchSize     uint64
+	batchtype     string
+	sipirID       string
 )
 
 func init() {
 	flag.Uint64Var(&logNumEntries, "logN", 20, "Log2 of number of entries")
-	flag.Uint64Var(&uint64PerEntry, "perEntry", 1, "Number of uint64 per entry")
+	flag.Uint64Var(&bitsPerVal, "bitsPerVal", 32, "Number of bits per value")
 	flag.Uint64Var(&batchSize, "batch", 1, "Batch size for PIR query")
 	flag.StringVar(&batchtype, "type", "skip", "Batch type: skip or rewind")
 	flag.StringVar(&sipirID, "sipirID", "singleserver", "Scheme type: piano, singleserver, singlepass")
@@ -39,8 +39,8 @@ func BenchmarkSkip(b *testing.B) {
 	db := utils.EncodedDB{}
 	numEntries := uint64(1 << logNumEntries)
 
-	db.InitParams(numEntries, uint64PerEntry)
-	sipir.InitParams(numEntries, uint64PerEntry, batchtype)
+	db.InitParams(numEntries, bitsPerVal)
+	sipir.InitParams(numEntries, bitsPerVal, batchtype)
 	db.Random()
 
 	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
@@ -85,7 +85,7 @@ func BenchmarkSkip(b *testing.B) {
 	}
 
 	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
-	fmt.Printf("SIPIR Evaluation Results (N=2^%d, uint64PerEntry=%d, Batch=%d)\n", logNumEntries, uint64PerEntry, batchSize)
+	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerVal, batchSize)
 	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
@@ -120,8 +120,8 @@ func BenchmarkRewind(b *testing.B) {
 	numEntries := uint64(1 << logNumEntries)
 
 	db := utils.EncodedDB{}
-	db.InitParams(numEntries, uint64PerEntry)
-	sipir.InitParams(numEntries, uint64PerEntry, batchtype)
+	db.InitParams(numEntries, bitsPerVal)
+	sipir.InitParams(numEntries, bitsPerVal, batchtype)
 	db.Random()
 
 	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
@@ -166,7 +166,7 @@ func BenchmarkRewind(b *testing.B) {
 	}
 
 	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
-	fmt.Printf("SIPIR Evaluation Results (N=2^%d, uint64PerEntry=%d, Batch=%d)\n", logNumEntries, uint64PerEntry, batchSize)
+	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerVal, batchSize)
 	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)

@@ -1,3 +1,0 @@
-[submodule "extern/pasta-bit-vector"]
-	path = extern/pasta-bit-vector
-	url = https://github.com/pasta-toolbox/bit_vector.git

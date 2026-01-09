@@ -56,6 +56,7 @@ func (g *MPHFKVS[M, T]) EncodeBucket(bucket *utils.Bucket) utils.EncodedDB {
 		Data:           dbData,
 		NumEntries:     NumEntries,
 		Uint64PerEntry: uint64(W),
+		BitsPerEntry:   uint64(W) * 64,
 	}
 }
 
@@ -113,7 +114,7 @@ func (g *MPHFKVS[M, T]) Encode(kv *utils.KV) utils.EncodedDB {
 	g.ValueOffsets[count] = uint32(currentArrayOffset)
 
 	return utils.EncodedDB{
-		Data: dbData, NumEntries: NumEntries, Uint64PerEntry: uint64(W),
+		Data: dbData, NumEntries: NumEntries, Uint64PerEntry: uint64(W), BitsPerEntry: uint64(W) * 64,
 	}
 }
 

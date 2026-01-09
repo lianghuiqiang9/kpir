@@ -8,7 +8,7 @@ import (
 
 // go test -run TestPTHash
 func TestPTHash(t *testing.T) {
-	const N = 1 << 20 // 先用小规模测试
+	const N = 1 << 20
 	keys := make([]uint64, N)
 	rng := rand.New(rand.NewSource(42))
 
@@ -22,7 +22,6 @@ func TestPTHash(t *testing.T) {
 	}
 	defer phf.Free()
 
-	// 验证逻辑
 	occupied := make([]bool, N)
 	for _, k := range keys {
 		idx := phf.Lookup(k)

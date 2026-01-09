@@ -12,17 +12,16 @@ import (
 // go test -run TestHepir
 func TestHepir(t *testing.T) {
 	logNumEntries := uint64(20)
-	uint64PerEntry := uint64(2)
+	bitsPerVal := uint64(32)
 	batchSize := uint64(1)
-	saveToDisk := true
-	hepir := simplepir.SimplePIR{} //simplepir.DoublePIR{} //simplepir.SimplePIR{}
+	saveToDisk := false
+	hepir := simplepir.DoublePIR{} //simplepir.DoublePIR{} //simplepir.SimplePIR{}
 
 	numEntries := uint64(1 << logNumEntries)
-	//bitsPerEntry := uint64PerEntry * 64
 	db := utils.EncodedDB{}
-	db.InitParams(numEntries, uint64PerEntry)
+	db.InitParams(numEntries, bitsPerVal)
 
-	hepir.InitParams(numEntries, uint64PerEntry)
+	hepir.InitParams(numEntries, bitsPerVal)
 	internalDB := &simplepir.InternalDB{}
 	serverHint := &simplepir.State{}
 	clientHint := &simplepir.State{}

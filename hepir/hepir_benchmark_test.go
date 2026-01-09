@@ -11,20 +11,20 @@ import (
 )
 
 var (
-	logNumEntries  uint64
-	uint64PerEntry uint64
-	batchSize      uint64
-	pirID          string
+	logNumEntries uint64
+	bitsPerVal    uint64
+	batchSize     uint64
+	pirID         string
 )
 
 func init() {
 	flag.Uint64Var(&logNumEntries, "logN", 20, "Log2 of number of entries")
-	flag.Uint64Var(&uint64PerEntry, "perEntry", 1, "Number of uint64 per entry")
+	flag.Uint64Var(&bitsPerVal, "bitsPerVal", 32, "Number of bits per entry")
 	flag.Uint64Var(&batchSize, "batch", 1, "Batch size for PIR query")
 	flag.StringVar(&pirID, "pirID", "simplepir", "Scheme type: simplepir, doublepir")
 }
 
-// go test -bench=BenchmarkHepir -benchmem -run=none -v -args -logN=20 -perEntry=1 -batch=1 -sipirID=simplepir
+// go test -bench=BenchmarkHepir -benchmem -run=none -v -args -logN=20 -bitsPerVal=32 -batch=1 -sipirID=simplepir
 
 // go test -bench=BenchmarkHepir -benchmem -run=none -v
 func BenchmarkHepir(b *testing.B) {
@@ -45,9 +45,9 @@ func BenchmarkHepir(b *testing.B) {
 
 	numEntries := uint64(1 << logNumEntries)
 	db := utils.EncodedDB{}
-	db.InitParams(numEntries, uint64PerEntry)
+	db.InitParams(numEntries, bitsPerVal)
 
-	hepir.InitParams(numEntries, uint64PerEntry)
+	hepir.InitParams(numEntries, bitsPerVal)
 
 	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
 	var totalQuerySize, totalAnswerSize float64

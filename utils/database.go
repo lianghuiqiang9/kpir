@@ -17,18 +17,14 @@ type EncodedDB struct {
 	Data           []uint64
 	NumEntries     uint64
 	Uint64PerEntry uint64
+	BitsPerEntry   uint64
 }
 
 func (db *EncodedDB) Size() int {
 	if db == nil {
 		return 0
 	}
-
-	// 1. 结构体本身的固定开销 (Data slice header + 2个 uint64)
 	size := int(unsafe.Sizeof(*db))
-
-	// 2. Data 切片的底层数组大小 (每个 uint64 占 8 字节)
-	// 使用 cap 更能反映真实的物理内存占用
 	size += cap(db.Data) * 8
 
 	return size
@@ -38,8 +34,15 @@ func (db *EncodedDB) SizeGB() float64 {
 	return float64(db.Size()) / (1024 * 1024 * 1024)
 }
 
-func (db *EncodedDB) InitParams(numEntries uint64, uint64PerEntry uint64) {
+func (db *EncodedDB) InitParams(numEntries uint64, bitsPerEntry uint64) {
+	if bitsPerEntry%32 != 0 {
+		fmt.Println("bitsPerVal should be 32 * k")
+		os.Exit(1)
+	}
+	uint64PerEntry := (bitsPerEntry + 63) / 64
+
 	db.NumEntries = NextPerfectSquare(numEntries)
+	db.BitsPerEntry = bitsPerEntry
 	db.Uint64PerEntry = uint64PerEntry
 
 	totalWords := numEntries * uint64PerEntry
@@ -50,9 +53,20 @@ func (db *EncodedDB) InitParams(numEntries uint64, uint64PerEntry uint64) {
 
 func (db *EncodedDB) Random() {
 	db.Data = make([]uint64, db.NumEntries*db.Uint64PerEntry)
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := range db.Data {
-		db.Data[i] = rng.Uint64()
+	var lastWordMask uint64 = math.MaxUint64
+	if db.BitsPerEntry%64 != 0 {
+		lastWordMask = 0xFFFFFFFF
+	}
+
+	for i := uint64(0); i < db.NumEntries; i++ {
+		for j := uint64(0); j < db.Uint64PerEntry; j++ {
+			idx := i*db.Uint64PerEntry + j
+			val := rand.Uint64()
+			if j == db.Uint64PerEntry-1 {
+				val &= lastWordMask
+			}
+			db.Data[idx] = val
+		}
 	}
 }
 
@@ -300,14 +314,12 @@ func (b *Bucket) LoadBuckets(id string, filepath string, numKeys uint64, bitsPer
 	fileName := fmt.Sprintf("%s%s_bucket_%d.bin", filepath, id, index)
 	b.Setup(numKeys, bitsPerValue)
 
-	// 2. 尝试打开/创建文件
 	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("无法处理桶文件 %d: %v", index, err)
 	}
 	defer f.Close()
 
-	// 3. 准备内存
 	if len(b.Keys) == 0 {
 		b.Keys = make([]uint64, b.TotalKeys)
 	}
@@ -499,79 +511,6 @@ func (kv *KV) GetValAndComp(outKey uint64, innKey uint64, targetValue []uint64) 
 	}
 	return kv.Buckets[outKey].GetValAndComp(innKey, targetValue)
 }
-
-/*
-func (kv *KV) LoadKV(id string, filepath string, numKeys uint64, uint64PerVal uint64) int64 {
-	kvFile := filepath + id + "kv.bin"
-	// 1. 初始化元数据参数 (BucketCount, BucketSizes 等)
-	kv.Setup(numKeys, uint64PerVal)
-
-	// 确保每个 Bucket 的 Uint64PerVal 被正确设置
-	for i := range kv.Buckets {
-		kv.Buckets[i].Uint64PerVal = uint64PerVal
-	}
-
-	f, err := os.OpenFile(kvFile, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatalf("KV file operation failed: %v", err)
-	}
-	defer f.Close()
-
-	fi, _ := f.Stat()
-	var dbSize int64
-
-	if fi.Size() == 0 {
-		// --- 情况 A: 第一次生成 ---
-		fmt.Printf("KV Store [%s] not found. Generating %d keys...\n", id, numKeys)
-		kv.Random()
-
-		fmt.Println("Writing data to disk (Columnar Blocks)...")
-		// 顺序写入所有桶的 Keys
-		for i := uint64(0); i < kv.BucketCount; i++ {
-			binary.Write(f, binary.LittleEndian, kv.Buckets[i].Keys)
-		}
-		// 顺序写入所有桶的 Values
-		for i := uint64(0); i < kv.BucketCount; i++ {
-			binary.Write(f, binary.LittleEndian, kv.Buckets[i].Values)
-		}
-
-		f.Sync()
-		newFi, _ := f.Stat()
-		dbSize = newFi.Size()
-		fmt.Printf("Generate Done, File size: %.2f GB\n", float64(dbSize)/(1024*1024*1024))
-
-	} else {
-		// --- 情况 B: 从磁盘快速加载 ---
-		dbSize = fi.Size()
-		fmt.Printf("Fast Loading Bucket-based KV [%s] (Size: %.2f GB)...\n", id, float64(dbSize)/(1024*1024*1024))
-
-		// 1. 重建索引 (Skip 磁盘读取)
-		kv.BucketIndices = make([]uint64, kv.BucketCount)
-		for i := uint64(0); i < kv.BucketCount; i++ {
-			kv.BucketIndices[i] = i
-		}
-
-		// 2. 读取 Keys 数据块
-		for i := uint64(0); i < kv.BucketCount; i++ {
-			kv.Buckets[i].Keys = make([]uint64, kv.BucketSizes[i])
-			if err := binary.Read(f, binary.LittleEndian, kv.Buckets[i].Keys); err != nil {
-				log.Fatalf("Read Bucket[%d] Keys failed: %v", i, err)
-			}
-		}
-
-		// 3. 读取 Values 数据块
-		for i := uint64(0); i < kv.BucketCount; i++ {
-			valLen := kv.BucketSizes[i] * uint64PerVal
-			kv.Buckets[i].Values = make([]uint64, valLen)
-			if err := binary.Read(f, binary.LittleEndian, kv.Buckets[i].Values); err != nil {
-				log.Fatalf("Read Bucket[%d] Values failed: %v", i, err)
-			}
-		}
-	}
-
-	return dbSize
-}
-*/
 
 // MergeBuckets consolidates individual bucket files into a single master kv.bin
 func (kv *KV) MergeBuckets(id string, filepath string) {

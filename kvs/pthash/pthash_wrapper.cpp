@@ -7,7 +7,7 @@ extern "C" {
 
     PTHashPtr pthash_init(uint64_t* keys, size_t n) {
         using namespace pthash;
-        // 使用与你之前一致的平衡配置
+
         typedef dense_partitioned_phf<xxhash_128, opt_bucketer, R_int, true> pthash_type;
         
         pthash_type* f = new pthash_type();
@@ -15,7 +15,7 @@ extern "C" {
         config.alpha = 0.98;
         config.lambda = 5;
         config.num_threads = 1;
-        // 注意：如果 n 很小，dense_partitioning 必须为 false，否则会报错
+
         config.dense_partitioning = (n > 100000); 
         config.verbose = false;
 

@@ -24,7 +24,6 @@ func (bbhash2kvs *BBHash2KVS) Name() string {
 
 func (bbhash2kvs *BBHash2KVS) Size() uint64 {
 	var total uint64
-	// 1. 结构体基本开销
 	total += uint64(unsafe.Sizeof(*bbhash2kvs))
 
 	for i, b := range bbhash2kvs.BBHash2 {
@@ -43,16 +42,14 @@ func (bbhash2kvs *BBHash2KVS) EncodeSingleBucket(bucket *utils.Bucket, dbData []
 	W := bucket.Uint64PerVal
 	totalKeys := bucket.TotalKeys
 
-	// 创建 BBHash
 	bb, _ := bbhash2.New(bucket.Keys, bbhash2.Gamma(1), bbhash2.WithReverseMap())
 
-	// 计算在 dbData 中的起始物理位置
 	baseOffset := startEntryOffset * W
 
 	if bucket.IsSort {
 		for i := uint64(0); i < totalKeys; i++ {
 			k := bb.Key(i + 1)
-			v, _ := bucket.GetValInterpolation(k) // 很长时间
+			v, _ := bucket.GetValInterpolation(k)
 			val := utils.KVSFingerPrint[TBBHash2](k, v)
 			targetOffset := baseOffset + i*W
 			copy(dbData[targetOffset:targetOffset+W], val)
@@ -79,7 +76,6 @@ func (bbhash2kvs *BBHash2KVS) EncodeBucket(bucket *utils.Bucket) utils.EncodedDB
 	bbhash2kvs.BatchSize = 1
 	bbhash2kvs.ValueOffsets = []uint32{0, uint32(totalKeys)}
 
-	// 调用复用函数
 	bb := bbhash2kvs.EncodeSingleBucket(bucket, dbData, 0)
 	bbhash2kvs.BBHash2 = []*bbhash2.BBHash2{bb}
 
@@ -87,6 +83,7 @@ func (bbhash2kvs *BBHash2KVS) EncodeBucket(bucket *utils.Bucket) utils.EncodedDB
 		Data:           dbData,
 		NumEntries:     NumEntries,
 		Uint64PerEntry: uint64(W),
+		BitsPerEntry:   uint64(W) * 64,
 	}
 }
 
@@ -119,6 +116,7 @@ func (bbhash2kvs *BBHash2KVS) Encode(kv *utils.KV) utils.EncodedDB {
 		Data:           dbData,
 		NumEntries:     NumEntries,
 		Uint64PerEntry: uint64(W),
+		BitsPerEntry:   uint64(W) * 64,
 	}
 }
 

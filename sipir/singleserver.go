@@ -11,7 +11,7 @@ import (
 	utils "github.com/local/utils"
 )
 
-const InvalidIndex = 0xFFFFFFFF // 使用最大值表示不存在
+const InvalidIndex = 0xFFFFFFFF
 
 type Hist struct {
 	C []uint32
@@ -158,7 +158,6 @@ func (p *DS) Locate(i, e uint32) uint32 {
 	c := rowP[e]
 	M := p.M
 
-	// 优化：将循环内的常数逻辑外提
 	for {
 		val, ok := p.Hist.Inv(c)
 		if !ok {
@@ -281,7 +280,12 @@ func (p *SingleServer) Name() string {
 	return "SingleServer-PIR"
 }
 
-func (p *SingleServer) InitParams(numEntries uint64, uint64PerEntry uint64, batchtype string) {
+func (p *SingleServer) InitParams(numEntries uint64, bitsPerVal uint64, batchtype string) {
+	if bitsPerVal%32 != 0 {
+		fmt.Println("bitsPerVal should be 32 * k")
+		os.Exit(1)
+	}
+	uint64PerEntry := (bitsPerVal + 63) / 64
 	// make sure numEntries is a perfect square
 	numEntries = utils.NextPerfectSquare(numEntries)
 

@@ -102,7 +102,13 @@ func (p *SinglePass) Name() string {
 	return "SinglePass-PIR"
 }
 
-func (p *SinglePass) InitParams(numEntries uint64, uint64PerEntry uint64, batchtype string) {
+func (p *SinglePass) InitParams(numEntries uint64, bitsPerVal uint64, batchtype string) {
+	if bitsPerVal%32 != 0 {
+		fmt.Println("bitsPerVal should be 32 * k")
+		os.Exit(1)
+	}
+	uint64PerEntry := (bitsPerVal + 63) / 64
+
 	numEntries = utils.NextPerfectSquare(numEntries)
 	T := uint32(math.Sqrt(float64(numEntries)))
 

@@ -1,15 +1,15 @@
 
-# go invoke c++
-1. 
 cd ConsensusRecSplit
 mkdir build
 cd build
 cmake ..
 make
 
-2. Add #include<iostream> to ConsensusRecSplit/include/consensus/UnalignedBitVector.h
+cd ..
+cd ..
 
-3. 
+sed -i '2i#include <iostream>' ConsensusRecSplit/include/consensus/UnalignedBitVector.h
+
 g++ -std=c++20 -O3 -fPIC -shared \
   -I./ConsensusRecSplit/include \
   -I./ConsensusRecSplit/extlib/ips2ra/include \
@@ -21,5 +21,4 @@ g++ -std=c++20 -O3 -fPIC -shared \
   -o libconsensusrecsplit_wrapper.so \
   consensusrecsplit_wrapper.cpp
 
-4. 
 go test -run TestConsensusRecSplit

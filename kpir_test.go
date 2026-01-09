@@ -18,8 +18,8 @@ func TestKeywordSipirRewind(t *testing.T) {
 
 	//saveToDisk := false
 	batchtype := "rewind"
-	sipir := sipir.SingleServer{} //Piano{} //SingleServer{} //SinglePass{}
-	kvs := kvs.NewPTHashKVS()     //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
+	sipir := sipir.SinglePass{} //Piano{} //SingleServer{} //SinglePass{}
+	kvs := kvs.NewBBHashKVS()   //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
 	defer kvs.Free()
 
 	kv := &utils.KV{}
@@ -29,7 +29,7 @@ func TestKeywordSipirRewind(t *testing.T) {
 	kv.Sort()
 	db := kvs.Encode(kv)
 
-	sipir.InitParams(db.NumEntries, db.Uint64PerEntry, batchtype)
+	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
 	sipir.GenerateHint(&db)
 
 	batchSize := kvs.BatchSize
@@ -42,12 +42,10 @@ func TestKeywordSipirRewind(t *testing.T) {
 		innkey := kv.Buckets[outkey].Keys[innkeyIndex]
 
 		targetIndexes := kvs.Index(outkey, innkey)
-		//fmt.Println("outkey: ", outkey, " innkey: ", innkey, " targetIndexes: ", targetIndexes)
 
 		// Batch IndexPIR Start
 
 		req, state := sipir.QueryAndFakeRefresh(targetIndexes)
-		//fmt.Printf("Sent Batch Query: %d indexes. Message Size: %.2f bytes\n", batchSize, req.(sipirMessage).Size())
 
 		resp := sipir.Answer(&db, req)
 
@@ -86,7 +84,7 @@ func TestKeywordSipirSkip(t *testing.T) {
 	kv.Sort()
 	db := kvs.Encode(kv)
 
-	sipir.InitParams(db.NumEntries, db.Uint64PerEntry, batchtype)
+	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
 	sipir.GenerateHint(&db)
 
 	batchSize := kvs.BatchSize
@@ -98,12 +96,10 @@ func TestKeywordSipirSkip(t *testing.T) {
 		innkey := kv.Buckets[outkey].Keys[innkeyIndex]
 
 		targetIndexes := kvs.Index(outkey, innkey)
-		//fmt.Println("targetIndexes: ", targetIndexes)
 
 		// Batch IndexPIR Start
 
 		req, state := sipir.Query(targetIndexes)
-		//fmt.Printf("Sent Batch Query: %d indexes. Message Size: %.2f bytes\n", batchSize, req.(sipirMessage).Size())
 
 		resp := sipir.Answer(&db, req)
 
@@ -128,7 +124,7 @@ func TestKeywordSipirSkip(t *testing.T) {
 // go test kpir_test.go -v -run TestKeywordHepir
 func TestKeywordHepir(t *testing.T) {
 	logNumsKeys := uint64(20)
-	bitsPerVal := uint64(32)
+	bitsPerVal := uint64(64)
 
 	//saveToDisk := false
 	hepir := simplepir.DoublePIR{} //simplepir.DoublePIR{} //simplepir.SimplePIR{}
@@ -142,7 +138,7 @@ func TestKeywordHepir(t *testing.T) {
 	kv.Sort()
 	db := kvs.Encode(kv)
 
-	hepir.InitParams(db.NumEntries, db.Uint64PerEntry)
+	hepir.InitParams(db.NumEntries, db.BitsPerEntry)
 	internalDB := hepir.MakeInternalDB(&db)
 	serverHint, clientHint := hepir.Setup(internalDB)
 
@@ -154,7 +150,6 @@ func TestKeywordHepir(t *testing.T) {
 		outkey, innkey := kv.GenRandomKey()
 
 		targetIndexes := kvs.Index(outkey, innkey)
-		//fmt.Println("targetIndexes: ", targetIndexes)
 
 		// Batch IndexPIR Start
 
@@ -169,7 +164,6 @@ func TestKeywordHepir(t *testing.T) {
 		// Batch IndexPIR End
 
 		val, _ := kvs.Decode(innkey, results)
-		//fmt.Println("val: ", val)
 		_, march := kv.GetValAndComp(outkey, innkey, val)
 		if !march {
 			fmt.Println("Keyword HEPIR Failed")

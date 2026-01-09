@@ -33,8 +33,7 @@ func (pi *DoublePIR) Name() string {
 	return "DoublePIR"
 }
 
-func (pi *DoublePIR) InitParams(numEntries, uint64PerEntry uint64) Params {
-	bitsPerEntry := uint64PerEntry * 64
+func (pi *DoublePIR) InitParams(numEntries, bitsPerVal uint64) Params {
 	n := uint64(1 << 10)
 	logq := uint64(32)
 
@@ -43,7 +42,7 @@ func (pi *DoublePIR) InitParams(numEntries, uint64PerEntry uint64) Params {
 
 	// Iteratively refine p and DB dims, until find tight values
 	for mod_p := uint64(2); ; mod_p += 1 {
-		l, m := ApproxDatabaseDims(numEntries, bitsPerEntry, mod_p, COMP_RATIO*n)
+		l, m := ApproxDatabaseDims(numEntries, bitsPerVal, mod_p, COMP_RATIO*n)
 
 		p := Params{
 			N:    n,
@@ -60,7 +59,7 @@ func (pi *DoublePIR) InitParams(numEntries, uint64PerEntry uint64) Params {
 			good_p.Print()
 			pi.Params = good_p
 			pi.DBInfo.NumEntries = numEntries
-			pi.DBInfo.BitsPerEntry = bitsPerEntry
+			pi.DBInfo.BitsPerEntry = bitsPerVal
 			return good_p
 		}
 

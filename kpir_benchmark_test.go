@@ -72,7 +72,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 	db := kvs.Encode(kv)
 	encodeDuration := time.Since(start)
 	start = time.Now()
-	pir.InitParams(db.NumEntries, db.Uint64PerEntry, batchtype)
+	pir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
 	pir.GenerateHint(&db)
 	genHintDuration := time.Since(start)
 
@@ -173,7 +173,7 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 	encodeDuration := time.Since(start)
 
 	start = time.Now()
-	sipir.InitParams(db.NumEntries, db.Uint64PerEntry, batchtype)
+	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
 	sipir.GenerateHint(&db)
 	genHintDuration := time.Since(start)
 
@@ -284,7 +284,7 @@ func BenchmarkKeywordHepir(b *testing.B) {
 	encodeDuration := time.Since(start)
 
 	start = time.Now()
-	hepir.InitParams(db.NumEntries, db.Uint64PerEntry)
+	hepir.InitParams(db.NumEntries, db.BitsPerEntry)
 	internalDB := hepir.MakeInternalDB(&db)
 	serverHint, clientHint := hepir.Setup(internalDB)
 	setupDuration := time.Since(start)

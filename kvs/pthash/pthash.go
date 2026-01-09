@@ -30,7 +30,7 @@ func New(keys []uint64) *PTHash {
 	ptr := C.pthash_init(cKeys, C.size_t(len(keys)))
 
 	p := &PTHash{ptr: ptr}
-	// 利用 Go 的 GC 自动释放 C++ 内存（可选，但建议显式 Close）
+
 	runtime.SetFinalizer(p, func(obj *PTHash) {
 		obj.Free()
 	})

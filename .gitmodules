@@ -1,11 +1,11 @@
 [submodule "kvs/consensusrecsplit/ConsensusRecSplit"]
 	path = kvs/consensusrecsplit/ConsensusRecSplit
-	url = https://github.com/lianghuiqiang9/ConsensusRecSplit.git
+	url = https://github.com/ByteHamster/ConsensusRecSplit.git
 
 [submodule "kvs/bbhash/BBHash"]
 	path = kvs/bbhash/BBHash
-	url = https://github.com/lianghuiqiang9/BBHash.git
+	url = https://github.com/rizkg/BBHash.git
 
 [submodule "kvs/pthash/pthash"]
 	path = kvs/pthash/pthash
-	url = https://github.com/lianghuiqiang9/pthash.git
+	url = https://github.com/jermp/pthash.git

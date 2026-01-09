@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-// 全局变量防止编译器优化掉循环体
 var globalSlice []uint64
 
 // go test -bench=BenchmarkBucket -benchmem -run=none -v

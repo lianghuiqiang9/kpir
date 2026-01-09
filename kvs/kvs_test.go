@@ -122,12 +122,11 @@ func TestBucketStore(t *testing.T) {
 	bucket.Setup(1<<20, 160)
 	bucket.Random()
 
-	// 每桶只看前 3 条数据
 	bucket.Print(3)
 	val, flag := bucket.GetVal(14310880194869718394)
 	fmt.Println("", val, flag)
 
-	kvs := BBHash2KVS{} //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
+	kvs := NewBBHashKVS() //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
 	//PTHashKVS{} //BFFKVS{} BBHashKVS{} BBHash2KVS{} PTHashKVS{} ConsensusRecSplitKVS{}
 	defer kvs.Free()
 

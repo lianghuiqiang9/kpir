@@ -9,7 +9,7 @@ import (
 // go test -run TestKV
 func TestKV(t *testing.T) {
 	bucket := &Bucket{}
-	bucket.Setup(1<<25, 32) // MaxNumsInnKey
+	bucket.Setup(1<<20, 32) // MaxNumsInnKey
 	bucket.Random()
 
 	bucket.Print(3)

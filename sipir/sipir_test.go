@@ -10,7 +10,7 @@ import (
 // go test -run TestSkip
 func TestSkip(t *testing.T) {
 	logNumEntries := uint64(20)
-	uint64PerEntry := uint64(1)
+	bitsPerVal := uint64(32)
 	batchSize := uint64(3)
 	saveToDisk := false
 	sipir := Piano{}
@@ -18,8 +18,8 @@ func TestSkip(t *testing.T) {
 
 	numEntries := uint64(1 << logNumEntries)
 	db := utils.EncodedDB{}
-	db.InitParams(numEntries, uint64PerEntry)
-	sipir.InitParams(numEntries, uint64PerEntry, batchtype)
+	db.InitParams(numEntries, bitsPerVal)
+	sipir.InitParams(numEntries, bitsPerVal, batchtype)
 	fmt.Printf("%s, initial Params: %+v\n", sipir.Name(), sipir.Params)
 
 	if saveToDisk {
@@ -53,7 +53,7 @@ func TestSkip(t *testing.T) {
 // go test -run TestRewind
 func TestRewind(t *testing.T) {
 	logNumEntries := uint64(20)
-	uint64PerEntry := uint64(2) // *64 bits
+	bitsPerVal := uint64(96) // *64 bits
 	batchSize := uint64(3)
 	saveToDisk := false
 	batchtype := "rewind"
@@ -61,8 +61,8 @@ func TestRewind(t *testing.T) {
 
 	numEntries := uint64(1 << logNumEntries)
 	db := utils.EncodedDB{}
-	db.InitParams(numEntries, uint64PerEntry)
-	sipir.InitParams(numEntries, uint64PerEntry, batchtype)
+	db.InitParams(numEntries, bitsPerVal)
+	sipir.InitParams(numEntries, bitsPerVal, batchtype)
 	fmt.Printf("%s, initial Params: %+v\n", sipir.Name(), sipir.Params)
 
 	if saveToDisk {

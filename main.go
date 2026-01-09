@@ -9,7 +9,7 @@ import (
 
 func main() {
 	kv := &utils.KV{}
-	kv.Setup(1<<20, 32)
+	kv.Setup(1<<20, 96)
 	kv.Random()
 
 	kvs := kvs.BBHash2KVS{} //BFFKVS{}

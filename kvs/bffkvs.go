@@ -43,7 +43,6 @@ func (bffkvs *BFFKVS) Size() uint64 {
 
 	total += uint64(unsafe.Sizeof(*bffkvs))
 
-	// 2. SegmentLength 切片 (uint32 = 4 bytes)
 	total += uint64(len(bffkvs.SegmentLength) * 4)
 
 	total += uint64(len(bffkvs.SegmentCountLength) * 4)
@@ -84,6 +83,7 @@ func (bffkvs *BFFKVS) EncodeBucket(bucket *utils.Bucket) utils.EncodedDB {
 		Data:           dbData,
 		NumEntries:     uint64(NumEntries),
 		Uint64PerEntry: uint64(W),
+		BitsPerEntry:   uint64(W) * 64,
 	}
 }
 
@@ -140,6 +140,7 @@ func (bffkvs *BFFKVS) Encode(kv *utils.KV) utils.EncodedDB {
 		Data:           dbData,
 		NumEntries:     uint64(NumEntries),
 		Uint64PerEntry: uint64(W),
+		BitsPerEntry:   uint64(W) * 64,
 	}
 }
 

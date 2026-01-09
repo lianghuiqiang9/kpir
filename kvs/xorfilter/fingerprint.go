@@ -76,22 +76,19 @@ func Sort(keys []uint64, vals []uint64) ([]uint64, []uint64) {
 	n := len(keys)
 	w := len(vals) / n
 
-	// 1. 构造一个紧凑的辅助结构，利用 CPU 缓存行 (Cache Line)
 	type pair struct {
 		key uint64
-		idx int // 只存索引
+		idx int
 	}
 	pairs := make([]pair, n)
 	for i := range keys {
 		pairs[i] = pair{keys[i], i}
 	}
 
-	// 2. 排序 pairs (pdqsort 在部分有序时极快)
 	sort.Slice(pairs, func(i, j int) bool {
 		return pairs[i].key < pairs[j].key
 	})
 
-	// 3. 一次性重组
 	newKeys := make([]uint64, n)
 	newValues := make([]uint64, len(vals))
 	for i := 0; i < n; i++ {
@@ -113,8 +110,6 @@ func GetValInterpolation(keys []uint64, vals []uint64, uint64PerVal int, key uin
 			return nil, false
 		}
 
-		// 插值计算位置：pos = low + (key - keys[low]) * (high - low) / (keys[high] - keys[low])
-		// 注意：在大规模数据下要防止 uint64 溢出，建议转为 float64 计算
 		pos := low + int(float64(key-keys[low])/float64(keys[high]-keys[low])*float64(high-low))
 
 		if keys[pos] < key {
@@ -126,7 +121,7 @@ func GetValInterpolation(keys []uint64, vals []uint64, uint64PerVal int, key uin
 			return vals[start : start+uint64PerVal], true
 		}
 	}
-	// 最后可以用上面的逻辑兜底
+
 	return nil, false
 }
 
