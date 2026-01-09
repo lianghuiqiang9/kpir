@@ -1,11 +1,13 @@
 package sipir
 
 import (
+	rrand "crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"math"
 	"math/rand"
 	"os"
-	"time"
 
 	utils "github.com/local/utils"
 )
@@ -31,7 +33,7 @@ func (p *SinglePassParams) Print() string {
 }
 
 type SinglePassHint struct {
-	ck uint64
+	ck [16]byte
 	p  []uint32 // generate by ck, do not compute in hintsize
 	h  []uint64
 }
@@ -132,7 +134,11 @@ func (p *SinglePass) InitParams(numEntries uint64, bitsPerVal uint64, batchtype 
 	p.batchtype = batchtype
 }
 func (p *SinglePass) GenerateHint(db *utils.EncodedDB) Hint {
-	ck := uint64(time.Now().UnixNano())
+	//ck := uint64(time.Now().UnixNano())
+	var ck [16]byte
+	if _, err := rrand.Read(ck[:]); err != nil {
+		panic("failed to generate secure 128-bit seed: " + err.Error())
+	}
 	p_vals := p.InitP(ck)
 
 	uint64PerEntry := p.Params.Uint64PerEntry
@@ -163,7 +169,7 @@ func (p *SinglePass) GenerateHint(db *utils.EncodedDB) Hint {
 	return p.Hint
 }
 
-func (p *SinglePass) InitP(seed uint64) []uint32 {
+func (p *SinglePass) InitP(seed [16]byte) []uint32 {
 	T := p.Params.T
 	M := p.Params.M
 
@@ -177,8 +183,17 @@ func (p *SinglePass) InitP(seed uint64) []uint32 {
 		for j := uint32(0); j < M; j++ {
 			row[j] = j
 		}
+		hash := sha256.New()
+		hash.Write(seed[:])
+		tempBuf := make([]byte, 4)
+		binary.LittleEndian.PutUint32(tempBuf, i)
+		hash.Write(tempBuf)
 
-		r := rand.New(rand.NewSource(int64(seed + uint64(i))))
+		digest := hash.Sum(nil)
+
+		seedInt64 := int64(binary.LittleEndian.Uint64(digest[:8]))
+		r := rand.New(rand.NewSource(seedInt64))
+		//r := rand.New(rand.NewSource(int64(seed + uint64(i))))
 
 		for j := M - 1; j > 0; j-- {
 			k := uint32(r.Intn(int(j + 1)))
@@ -193,7 +208,7 @@ func (p *SinglePass) LoadHint(id string, filepath string, db *utils.EncodedDB) (
 	ckPath := filepath + id + "ck.gob"
 	hPath := filepath + id + "h.gob"
 
-	var ck uint64
+	var ck [16]byte
 	var h_vals []uint64
 	var p_vals []uint32
 

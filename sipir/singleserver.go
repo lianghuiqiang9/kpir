@@ -1,12 +1,14 @@
 package sipir
 
 import (
+	rrand "crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/gob"
 	"fmt"
 	"math"
 	"math/rand"
 	"os"
-	"time"
 
 	utils "github.com/local/utils"
 )
@@ -75,7 +77,7 @@ type DS struct {
 	M    uint32
 	M2   uint32
 	Hist *Hist
-	Seed uint64
+	Seed [16]byte
 	P    []uint32 //P    [][]int
 	Pinv []uint32 //Pinv [][]int
 }
@@ -95,7 +97,7 @@ func init() {
 	gob.Register(DS{})
 }
 
-func (p *DS) Init(ck uint64, t, m, m2 uint32) {
+func (p *DS) Init(ck [16]byte, t, m, m2 uint32) {
 	p.T = t
 	p.M = m
 	p.M2 = m2
@@ -119,7 +121,17 @@ func (p *DS) InitP() {
 			subP[j] = j
 		}
 
-		r := rand.New(rand.NewSource(int64(p.Seed + uint64(i))))
+		hash := sha256.New()
+		hash.Write(p.Seed[:])
+		tempBuf := make([]byte, 4)
+		binary.LittleEndian.PutUint32(tempBuf, i)
+		hash.Write(tempBuf)
+
+		digest := hash.Sum(nil)
+
+		seedInt64 := int64(binary.LittleEndian.Uint64(digest[:8]))
+		r := rand.New(rand.NewSource(seedInt64))
+		//r := rand.New(rand.NewSource(int64(p.Seed + uint64(i))))
 		r.Shuffle(int(M2), func(a, b int) {
 			subP[a], subP[b] = subP[b], subP[a]
 		})
@@ -324,7 +336,7 @@ func (p *SingleServer) LoadHint(id string, filepath string, db *utils.EncodedDB)
 
 	var ds DS
 	var h []uint64
-	var ck uint64
+	var ck [16]byte
 
 	if flag1 && flag2 && flag3 {
 		fmt.Printf("[PIR] Loading existing hints for ID: %s\n", id)
@@ -370,7 +382,12 @@ func (p *SingleServer) LoadHint(id string, filepath string, db *utils.EncodedDB)
 
 func (p *SingleServer) GenerateHint(db *utils.EncodedDB) Hint {
 
-	ck := uint64(time.Now().UnixNano())
+	//ck := uint64(time.Now().UnixNano())
+	var ck [16]byte
+	if _, err := rrand.Read(ck[:]); err != nil {
+		panic("failed to generate secure 128-bit seed: " + err.Error())
+	}
+
 	ds := DS{}
 
 	T := p.Params.T
