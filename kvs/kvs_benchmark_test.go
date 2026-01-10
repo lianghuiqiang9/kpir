@@ -98,7 +98,7 @@ func BenchmarkKVStore(b *testing.B) {
 	fmt.Printf("KVStore Benchmark %s (N=2^%d, bitsPerVal=%dbits)\n", kvs.Name(), logNumsKeys, bitsPerVal)
 	fmt.Printf("Sort Time:   %v\n", sortDuration)
 	fmt.Printf("Encode Time:   %v\n", encodeDuration)
-	fmt.Printf("KVS Hint Size: %.2f KB\n", float64(kvs.Size())/1024)
-	fmt.Printf("KVS Ratio : %.3f \n", float64(db.NumEntries)/float64(uint64(1<<logNumsKeys)))
+	fmt.Printf("KVS Hint Size: %.4f KB, Bits per key: %.4f\n", float64(kvs.Size())/1024, float64(kvs.Size())*8/float64(uint64(1<<logNumsKeys)))
+	fmt.Printf("KVS Ratio : %.4f \n", float64(db.NumEntries)/float64(uint64(1<<logNumsKeys)))
 	fmt.Printf("Correctness:   %v\n", pass)
 }
