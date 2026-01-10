@@ -10,7 +10,7 @@ type KVSInterface interface {
 	Name() string
 	EncodeBucket(kv *utils.Bucket) utils.EncodedDB
 	Encode(kv *utils.KV) utils.EncodedDB
-	Index(i uint64, key uint64) []uint64
+	Lookup(i uint64, key uint64) []uint64
 	Decode(key uint64, rawVal [][]uint64) ([]uint64, bool)
 	Contains(outkey uint64, key uint64, db *utils.EncodedDB) ([]uint64, bool)
 	Size() uint64
@@ -118,7 +118,7 @@ func (g *MPHFKVS[M, T]) Encode(kv *utils.KV) utils.EncodedDB {
 	}
 }
 
-func (g *MPHFKVS[M, T]) Index(i uint64, key uint64) []uint64 {
+func (g *MPHFKVS[M, T]) Lookup(i uint64, key uint64) []uint64 {
 	baseOffset := uint64(g.ValueOffsets[i])
 	idx := g.MPH[i].Lookup(key)
 	if idx == ^uint64(0) {
@@ -140,7 +140,7 @@ func (g *MPHFKVS[M, T]) Free() {
 }
 
 func (g *MPHFKVS[M, T]) Contains(outkey uint64, key uint64, db *utils.EncodedDB) ([]uint64, bool) {
-	indexes := g.Index(outkey, key)
+	indexes := g.Lookup(outkey, key)
 	rawVal := db.GetBatchEntry(indexes)
 	return g.Decode(key, rawVal)
 }

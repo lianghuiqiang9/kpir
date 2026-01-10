@@ -144,7 +144,7 @@ func (bffkvs *BFFKVS) Encode(kv *utils.KV) utils.EncodedDB {
 	}
 }
 
-func (hint *BFFKVS) Index(i uint64, key uint64) []uint64 {
+func (hint *BFFKVS) Lookup(i uint64, key uint64) []uint64 {
 
 	SegmentCountLength := hint.SegmentCountLength[i]
 	SegmentLength := hint.SegmentLength[i]
@@ -178,7 +178,7 @@ func (bffkvs *BFFKVS) Decode(key uint64, rawVal [][]uint64) ([]uint64, bool) {
 }
 
 func (bffkvs *BFFKVS) Contains(outkey uint64, key uint64, db *utils.EncodedDB) ([]uint64, bool) {
-	indexes := bffkvs.Index(outkey, key)
+	indexes := bffkvs.Lookup(outkey, key)
 	rawVal := db.GetBatchEntry(indexes)
 	return bffkvs.Decode(key, rawVal)
 }

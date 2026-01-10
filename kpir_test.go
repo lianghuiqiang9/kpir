@@ -41,7 +41,7 @@ func TestKeywordSipirRewind(t *testing.T) {
 		innkeyIndex := rand.Uint64() % kv.Buckets[outkey].TotalKeys
 		innkey := kv.Buckets[outkey].Keys[innkeyIndex]
 
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 
 		// Batch IndexPIR Start
 
@@ -95,7 +95,7 @@ func TestKeywordSipirSkip(t *testing.T) {
 		innkeyIndex := rand.Uint64() % kv.Buckets[outkey].TotalKeys
 		innkey := kv.Buckets[outkey].Keys[innkeyIndex]
 
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 
 		// Batch IndexPIR Start
 
@@ -124,7 +124,7 @@ func TestKeywordSipirSkip(t *testing.T) {
 // go test kpir_test.go -v -run TestKeywordHepir
 func TestKeywordHepir(t *testing.T) {
 	logNumsKeys := uint64(20)
-	bitsPerVal := uint64(64)
+	bitsPerVal := uint64(32)
 
 	//saveToDisk := false
 	hepir := simplepir.DoublePIR{} //simplepir.DoublePIR{} //simplepir.SimplePIR{}
@@ -149,7 +149,7 @@ func TestKeywordHepir(t *testing.T) {
 
 		outkey, innkey := kv.GenRandomKey()
 
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 
 		// Batch IndexPIR Start
 

@@ -17,7 +17,7 @@ func main() {
 	db := kvs.Encode(kv)
 	for i := uint64(0); i < kv.BucketCount; i++ {
 		for j, key := range kv.Buckets[i].Keys {
-			indexes := kvs.Index(i, key)
+			indexes := kvs.Lookup(i, key)
 
 			rawVal := db.GetBatchEntry(indexes)
 

@@ -135,7 +135,7 @@ func TestBucketStore(t *testing.T) {
 	bucket.Print(3)
 
 	for _, key := range bucket.Keys {
-		indexes := kvs.Index(0, key)
+		indexes := kvs.Lookup(0, key)
 
 		rawVal := db.GetBatchEntry(indexes)
 
@@ -185,7 +185,7 @@ func TestKVStore(t *testing.T) {
 
 	for i := uint64(0); i < kv.BucketCount; i++ {
 		for _, key := range kv.Buckets[i].Keys[:1000] {
-			indexes := kvs.Index(i, key)
+			indexes := kvs.Lookup(i, key)
 
 			rawVal := db.GetBatchEntry(indexes)
 

@@ -120,7 +120,7 @@ func (bbhash2kvs *BBHash2KVS) Encode(kv *utils.KV) utils.EncodedDB {
 	}
 }
 
-func (bbhash2kvs *BBHash2KVS) Index(i uint64, key uint64) []uint64 {
+func (bbhash2kvs *BBHash2KVS) Lookup(i uint64, key uint64) []uint64 {
 	offset := uint64(bbhash2kvs.ValueOffsets[i])
 
 	// Find
@@ -140,7 +140,7 @@ func (bbhash2kvs *BBHash2KVS) Decode(key uint64, rawVal [][]uint64) ([]uint64, b
 }
 
 func (bbhash2kvs *BBHash2KVS) Contains(outkey uint64, key uint64, db *utils.EncodedDB) ([]uint64, bool) {
-	indexes := bbhash2kvs.Index(outkey, key)
+	indexes := bbhash2kvs.Lookup(outkey, key)
 	rawVal := db.GetBatchEntry(indexes)
 	return bbhash2kvs.Decode(key, rawVal)
 }

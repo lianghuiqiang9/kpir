@@ -67,12 +67,12 @@ func BenchmarkKVStore(b *testing.B) {
 
 	b.Run("KVS_Index", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_ = kvs.Index(testBucket, testKey)
+			_ = kvs.Lookup(testBucket, testKey)
 		}
 	})
 
 	// --- 4.  Decode (Online - Reconstruction) ---
-	indexes := kvs.Index(testBucket, testKey)
+	indexes := kvs.Lookup(testBucket, testKey)
 	rawVal := db.GetBatchEntry(indexes)
 
 	b.Run("KVS_Decode", func(b *testing.B) {
@@ -84,7 +84,7 @@ func BenchmarkKVStore(b *testing.B) {
 	pass := true
 	for i := uint64(0); i < kv.BucketCount; i++ {
 		for _, key := range kv.Buckets[i].Keys[:1000] {
-			idx := kvs.Index(i, key)
+			idx := kvs.Lookup(i, key)
 			rv := db.GetBatchEntry(idx)
 			val, _ := kvs.Decode(key, rv)
 			_, flag := kv.GetValAndComp(i, key, val)

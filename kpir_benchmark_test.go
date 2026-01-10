@@ -90,7 +90,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 		outkey, innkey := kv.GenRandomKey()
 		// --- A. Keyword Mapping (Client) ---
 		start := time.Now()
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 		tMapping += time.Since(start)
 
 		// --- B. Query Gen (Client) ---
@@ -192,7 +192,7 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 
 		// A. Keyword Mapping (Client)
 		t1 := time.Now()
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 		tMapping += time.Since(t1)
 
 		// B. Query Gen (Client)
@@ -302,7 +302,7 @@ func BenchmarkKeywordHepir(b *testing.B) {
 
 		// A. Keyword Mapping (Client)
 		t1 := time.Now()
-		targetIndexes := kvs.Index(outkey, innkey)
+		targetIndexes := kvs.Lookup(outkey, innkey)
 		tMapping += time.Since(t1)
 
 		// B. Query Gen (Client)

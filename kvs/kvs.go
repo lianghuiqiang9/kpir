@@ -9,7 +9,7 @@ type KVS interface {
 
 	Encode(kv *utils.KV) utils.EncodedDB
 
-	Index(bucketID uint64, key uint64) []uint64
+	Lookup(bucketID uint64, key uint64) []uint64
 
 	Decode(key uint64, rawVal [][]uint64) ([]uint64, bool)
 
