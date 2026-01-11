@@ -78,6 +78,44 @@ func KVSFingerPrintInv[T Unsigned](k uint64, v []uint64) ([]uint64, bool) {
 	return out, true
 }
 
+func KVSFingerPrint2[T Unsigned](k uint64, v []uint64) []uint64 {
+	fp := uint64(T(hash64(k)))    // hash(k)
+	out := make([]uint64, len(v)) //hashSlice(k, len(v))
+	copy(out, v)
+	//xorInplace(out, v) // v ^ hash2(k)
+
+	fpSize := bitsWidth[T]()
+	fpInHigh := fp << (64 - fpSize)
+
+	mask := uint64(0xFFFFFFFFFFFFFFFF >> fpSize)
+	lastIdx := len(out) - 1
+	out[lastIdx] = (out[lastIdx] & mask) | fpInHigh // v  | hash(k)
+
+	return out
+}
+
+func KVSFingerPrintInv2[T Unsigned](k uint64, v []uint64) ([]uint64, bool) {
+	fpSize := bitsWidth[T]()
+	lastIdx := len(v) - 1
+
+	extractedFp := v[lastIdx] >> (64 - fpSize)
+
+	expectedFp := uint64(T(hash64(k)))
+	if extractedFp != expectedFp {
+		return nil, false
+	}
+
+	out := make([]uint64, len(v)) //hashSlice(k, len(v))
+	copy(out, v)
+
+	//xorInplace(out, v)
+
+	mask := uint64(0xFFFFFFFFFFFFFFFF >> fpSize)
+	out[lastIdx] &= mask
+
+	return out, true
+}
+
 func Sort(keys []uint64, vals []uint64) ([]uint64, []uint64) {
 	n := len(keys)
 	w := len(vals) / n
