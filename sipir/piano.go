@@ -223,7 +223,7 @@ func (p *Piano) InitParams(numEntries uint64, bitsPerVal uint64, batchtype strin
 	sqrtNumEntries := math.Sqrt(float64(numEntries))
 	logeNumEntries := math.Log(float64(numEntries))
 	q := uint64(sqrtNumEntries * logeNumEntries) //\sqrt{DBsize} * log_e^DBsize=4*2.9,
-	m1 := 4 * q                                  //4 * \sqrt{DBsize} * log_e^DBsize=4*4*2.9
+	m1 := 4*q + 2                                //4 * \sqrt{DBsize} * log_e^DBsize=4*4*2.9
 	m2 := uint64(4 * logeNumEntries)
 
 	chunkSize := uint64(sqrtNumEntries)
