@@ -22,7 +22,7 @@ func (pi *SimplePIR) Name() string {
 	return "SimplePIR"
 }
 
-func (pi *SimplePIR) InitParams(numEntries, bitsPerVal uint64) Params {
+func (pi *SimplePIR) InitParams(numEntries, bitsPerEntry uint64) Params {
 	n := uint64(1 << 10)
 	logq := uint64(32)
 
@@ -32,7 +32,7 @@ func (pi *SimplePIR) InitParams(numEntries, bitsPerVal uint64) Params {
 	// Iteratively refine p and DB dims, until find tight values
 	for mod_p := uint64(2); ; mod_p += 1 {
 
-		l, m := ApproxSquareDatabaseDims(numEntries, bitsPerVal, mod_p)
+		l, m := ApproxSquareDatabaseDims(numEntries, bitsPerEntry, mod_p)
 		p := Params{
 			N:    n,
 			Logq: logq,
@@ -47,7 +47,7 @@ func (pi *SimplePIR) InitParams(numEntries, bitsPerVal uint64) Params {
 			good_p.Print()
 			pi.Params = good_p
 			pi.DBInfo.NumEntries = numEntries
-			pi.DBInfo.BitsPerEntry = bitsPerVal
+			pi.DBInfo.BitsPerEntry = bitsPerEntry
 			return good_p
 		}
 

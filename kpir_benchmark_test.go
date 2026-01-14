@@ -22,7 +22,7 @@ var (
 
 func init() {
 	flag.Uint64Var(&logNumsKeys, "logN", 20, "Log2 of number of entries")
-	flag.Uint64Var(&bitsPerVal, "bitsPerVal", 32, "Number of bits per entry")
+	flag.Uint64Var(&bitsPerVal, "bitsPerVal", 32, "Number of bits per value")
 	flag.StringVar(&kvsID, "kvsID", "pthashkvs", "KVS type: pthashkvs, bbhashkvs, bbhash2kvs, consensusrecsplitkvs, bffkvs")
 	flag.StringVar(&batchtype, "type", "skip", "Batch type: skip or rewind")
 	flag.StringVar(&pirID, "pirID", "singleserver", "Scheme type: piano, singleserver, singlepass, simplepir, doublepir")

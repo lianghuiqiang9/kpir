@@ -174,7 +174,7 @@ type Bucket struct {
 	Values    []uint64
 
 	Uint64PerVal uint64
-	BitsPerValue uint64
+	BitsPerVal   uint64
 	IsSort       bool
 }
 
@@ -191,15 +191,15 @@ func (b *Bucket) Size() int {
 
 	return size
 }
-func (b *Bucket) Setup(totalKeys uint64, bitsPerValue uint64) {
+func (b *Bucket) Setup(totalKeys uint64, bitsPerVal uint64) {
 	b.TotalKeys = totalKeys
-	if (bitsPerValue+32)%64 != 0 {
-		fmt.Println("bitsPerValue should be 32 + 64 * k")
+	if (bitsPerVal+32)%64 != 0 {
+		fmt.Println("bitsPerVal should be 32 + 64 * k")
 		os.Exit(1)
 	}
-	b.Uint64PerVal = (bitsPerValue / 64) + 1
+	b.Uint64PerVal = (bitsPerVal / 64) + 1
 
-	b.BitsPerValue = bitsPerValue
+	b.BitsPerVal = bitsPerVal
 	b.IsSort = false
 }
 
@@ -309,10 +309,10 @@ func (b *Bucket) GetValInterpolation(key uint64) ([]uint64, bool) {
 
 }
 
-func (b *Bucket) LoadBuckets(id string, filepath string, numKeys uint64, bitsPerValue uint64, index uint64) {
+func (b *Bucket) LoadBuckets(id string, filepath string, numKeys uint64, BitsPerVal uint64, index uint64) {
 
 	fileName := fmt.Sprintf("%s%s_bucket_%d.bin", filepath, id, index)
-	b.Setup(numKeys, bitsPerValue)
+	b.Setup(numKeys, BitsPerVal)
 
 	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -351,7 +351,7 @@ type KV struct {
 	Buckets []*Bucket
 
 	Uint64PerVal uint64
-	BitsPerValue uint64
+	BitsPerVal   uint64
 	IsSort       bool
 }
 
@@ -383,16 +383,16 @@ func (kv *KV) Size() int {
 	return size
 }
 
-func (kv *KV) Setup(totalKeys uint64, bitsPerValue uint64) {
+func (kv *KV) Setup(totalKeys uint64, BitsPerVal uint64) {
 
 	kv.TotalKeys = totalKeys
 
-	if (bitsPerValue+32)%64 != 0 {
-		fmt.Println("bitsPerValue should be 32 + 64 * k")
+	if (BitsPerVal+32)%64 != 0 {
+		fmt.Println("BitsPerVal should be 32 + 64 * k")
 		os.Exit(1)
 	}
 
-	kv.Uint64PerVal = (bitsPerValue / 64) + 1
+	kv.Uint64PerVal = (BitsPerVal / 64) + 1
 	kv.IsSort = false
 
 	kv.BucketCount = (totalKeys + MaxNumsPerBucket - 1) / MaxNumsPerBucket
@@ -415,7 +415,7 @@ func (kv *KV) Setup(totalKeys uint64, bitsPerValue uint64) {
 		kv.BucketSizes[i] = size
 
 		b := &Bucket{}
-		b.Setup(size, bitsPerValue)
+		b.Setup(size, BitsPerVal)
 		kv.Buckets[i] = b
 	}
 }

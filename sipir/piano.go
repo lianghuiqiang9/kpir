@@ -55,7 +55,6 @@ func (lh *LocalHint) calculateSize() float64 {
 	return size
 }
 
-// Copy 实现了 LocalHint 的深拷贝
 func (lh *LocalHint) Copy() LocalHint {
 	newLH := *lh
 
@@ -211,13 +210,13 @@ func (p *Piano) Name() string {
 	return "Piano-PIR"
 }
 
-func (p *Piano) InitParams(numEntries uint64, bitsPerVal uint64, batchtype string) {
-	if bitsPerVal%32 != 0 {
-		fmt.Println("bitsPerVal should be 32 * k")
+func (p *Piano) InitParams(numEntries uint64, bitsPerEntry uint64, batchtype string) {
+	if bitsPerEntry%32 != 0 {
+		fmt.Println("bitsPerEntry should be 32 * k")
 		os.Exit(1)
 	}
 
-	uint64PerEntry := (bitsPerVal + 63) / 64
+	uint64PerEntry := (bitsPerEntry + 63) / 64
 	numEntries = utils.NextPerfectSquare(numEntries)
 
 	sqrtNumEntries := math.Sqrt(float64(numEntries))

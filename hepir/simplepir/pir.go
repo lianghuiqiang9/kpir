@@ -6,7 +6,7 @@ import (
 
 type HEPIR interface {
 	// 基础配置
-	InitParams(N, perEntry uint64) Params
+	InitParams(N, bitsPerEntry uint64) Params
 	Name() string
 
 	MakeInternalDB(db *utils.EncodedDB) *InternalDB

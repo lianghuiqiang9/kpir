@@ -21,7 +21,7 @@ type State interface {
 type SIPIR interface {
 	Name() string
 
-	InitParams(numEntries uint64, uint64PerEntry uint64, Type string)
+	InitParams(numEntries uint64, bitsPerEntry uint64, Type string)
 
 	GenerateHint(db *utils.EncodedDB) Hint
 

@@ -292,12 +292,12 @@ func (p *SingleServer) Name() string {
 	return "SingleServer-PIR"
 }
 
-func (p *SingleServer) InitParams(numEntries uint64, bitsPerVal uint64, batchtype string) {
-	if bitsPerVal%32 != 0 {
-		fmt.Println("bitsPerVal should be 32 * k")
+func (p *SingleServer) InitParams(numEntries uint64, bitsPerEntry uint64, batchtype string) {
+	if bitsPerEntry%32 != 0 {
+		fmt.Println("bitsPerEntry should be 32 * k")
 		os.Exit(1)
 	}
-	uint64PerEntry := (bitsPerVal + 63) / 64
+	uint64PerEntry := (bitsPerEntry + 63) / 64
 	// make sure numEntries is a perfect square
 	numEntries = utils.NextPerfectSquare(numEntries)
 

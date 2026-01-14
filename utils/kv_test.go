@@ -37,7 +37,7 @@ func TestKV(t *testing.T) {
 	fmt.Println("", val3, flag3)
 
 	kv2.Sort()
-	kv2.Print(20)
+	kv2.Print(5)
 	val4, flag4 := kv2.GetVal(3, 259169879257162931)
 	fmt.Println("", val4, flag4)
 }
@@ -73,11 +73,11 @@ func TestGetVal(t *testing.T) {
 
 	Keys := bucket.Keys
 	Vals := bucket.Values
-	W := int(bucket.Uint64PerVal)
+	uint64PerVal := int(bucket.Uint64PerVal)
 
 	startBuild = time.Now()
 	for j := 0; j < len(Keys); j++ {
-		v, _ := GetValInterpolation(Keys, Vals, W, KeysRand[j])
+		v, _ := GetValInterpolation(Keys, Vals, uint64PerVal, KeysRand[j])
 
 		v[0] = v[0] + 1
 	}
@@ -87,7 +87,7 @@ func TestGetVal(t *testing.T) {
 
 	startBuild = time.Now()
 	for j := 0; j < len(Keys); j++ {
-		v, _ := GetValInterpolation(Keys, Vals, W, Keys[j])
+		v, _ := GetValInterpolation(Keys, Vals, uint64PerVal, Keys[j])
 		v[0] = v[0] + 1
 	}
 	buildTime = time.Since(startBuild)

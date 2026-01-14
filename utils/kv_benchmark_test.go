@@ -10,13 +10,13 @@ var globalSlice []uint64
 
 // go test -bench=BenchmarkBucket -benchmem -run=none -v
 func BenchmarkBucket(b *testing.B) {
-	logNumsKeys := 25
-	W := 32
+	logNumsKeys := uint64(25)
+	w := uint64(32)
 	totalKeys := uint64(1 << logNumsKeys)
 
 	// Data preparation
 	bucket := &Bucket{}
-	bucket.Setup(totalKeys, uint64(W))
+	bucket.Setup(totalKeys, w)
 	bucket.Random()
 
 	// --- 1. Benchmark: Map Construction ---
