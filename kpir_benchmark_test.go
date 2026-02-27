@@ -127,7 +127,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 
 	fmt.Printf("OFFLINE OVERHEAD:\n")
 	fmt.Printf("  - Encode DB:     %v\n", encodeDuration)
-	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v\n", genHintDuration, encodeDuration+genHintDuration)
+	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v, offline Communication: %.4f MB\n", genHintDuration, encodeDuration+genHintDuration, float64(db.Size()+kvs.Size())/(1024*1024))
 	fmt.Printf("  - Hint Storage:  KVS: %.4f KB, PIR: %.4f KB, overall Client hint size: %.4f MB\n", float64(kvs.Size())/1024, float64(pir.GetHintSize())/1024, (float64(kvs.Size())+pir.GetHintSize())/1024/1024)
 
 	fmt.Printf("\nONLINE LATENCY (Average over %.0f runs):\n", num)
@@ -229,7 +229,7 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 
 	fmt.Printf("OFFLINE OVERHEAD:\n")
 	fmt.Printf("  - Encode DB:     %v\n", encodeDuration)
-	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v\n", genHintDuration, encodeDuration+genHintDuration)
+	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v, offline Communication: %.4f MB\n", genHintDuration, encodeDuration+genHintDuration, float64(db.Size()+kvs.Size())/(1024*1024))
 	fmt.Printf("  - Hint Storage:  KVS: %.4f KB, PIR: %.4f KB, overall Client hint size: %.4f MB\n", float64(kvs.Size())/1024, float64(sipir.Hint.Size())/1024, (float64(kvs.Size())+sipir.Hint.Size())/1024/1024)
 
 	fmt.Printf("\nONLINE LATENCY (Average over %.0f runs):\n", num)
@@ -339,6 +339,7 @@ func BenchmarkKeywordHepir(b *testing.B) {
 
 	fmt.Printf("OFFLINE OVERHEAD:\n")
 	fmt.Printf("  - Encode DB:     %v\n", encodeDuration)
+	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v, offline Communication: %.4f MB\n", setupDuration, encodeDuration+setupDuration, float64(clientHint.Size()+kvs.Size())/(1024*1024))
 	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v\n", setupDuration, encodeDuration+setupDuration)
 	fmt.Printf("  - Hint Storage:   KVS: %.4f KB, Client: %.4f MB (all %.4f MB), Server: %.2f MB\n",
 		float64(kvs.Size())/1024, float64(clientHint.Size())/(1024*1024), float64(kvs.Size()+clientHint.Size())/(1024*1024), float64(serverHint.Size())/(1024*1024))

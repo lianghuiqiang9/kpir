@@ -20,14 +20,14 @@ type EncodedDB struct {
 	BitsPerEntry   uint64
 }
 
-func (db *EncodedDB) Size() int {
+func (db *EncodedDB) Size() uint64 {
 	if db == nil {
 		return 0
 	}
 	size := int(unsafe.Sizeof(*db))
 	size += cap(db.Data) * 8
 
-	return size
+	return uint64(size)
 }
 
 func (db *EncodedDB) SizeGB() float64 {
@@ -357,7 +357,7 @@ type KV struct {
 
 // Size returns the total memory consumption of the KV structure in bytes,
 // including all underlying buckets and slices.
-func (kv *KV) Size() int {
+func (kv *KV) Size() uint64 {
 	if kv == nil {
 		return 0
 	}
@@ -380,7 +380,7 @@ func (kv *KV) Size() int {
 		}
 	}
 
-	return size
+	return uint64(size)
 }
 
 func (kv *KV) Setup(totalKeys uint64, BitsPerVal uint64) {

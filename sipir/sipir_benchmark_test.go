@@ -43,6 +43,8 @@ func BenchmarkSkip(b *testing.B) {
 	sipir.InitParams(numEntries, bitsPerEntry, batchtype)
 	db.Random()
 
+	dbSizeMB := float64(db.Size()) / (1024 * 1024)
+
 	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
 	var totalQuerySize, totalAnswerSize float64
 	var numQueries uint64
@@ -86,7 +88,7 @@ func BenchmarkSkip(b *testing.B) {
 
 	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
 	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
-	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, maxQueries)
+	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB, Offline Communication: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, dbSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
 	avgA := float64(totalAnswerTime.Nanoseconds()) / float64(numQueries)
@@ -123,6 +125,8 @@ func BenchmarkRewind(b *testing.B) {
 	db.InitParams(numEntries, bitsPerEntry)
 	sipir.InitParams(numEntries, bitsPerEntry, batchtype)
 	db.Random()
+
+	dbSizeMB := float64(db.Size()) / (1024 * 1024)
 
 	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
 	var totalQuerySize, totalAnswerSize float64
@@ -167,7 +171,7 @@ func BenchmarkRewind(b *testing.B) {
 
 	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
 	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
-	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, maxQueries)
+	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB, Offline Communication: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, dbSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
 	avgA := float64(totalAnswerTime.Nanoseconds()) / float64(numQueries)

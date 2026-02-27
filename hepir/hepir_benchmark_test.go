@@ -92,8 +92,8 @@ func BenchmarkHepir(b *testing.B) {
 	}
 
 	fmt.Printf("SIPIR Name(): %s\n", hepir.Name())
-	fmt.Printf("HEPIR Evaluation (SimplePIR) Results (N=2^%d)\n", logNumEntries)
-	fmt.Printf("1. Setup (Preprocessing):    %v (clinetHint: %.2f MB, serverHint: %.2f MB)\n", setupDuration, clientHintSizeMB, serverHintSizeMB)
+	fmt.Printf("HEPIR Evaluation (%s) Results (N=2^%d)\n", hepir.Name(), logNumEntries)
+	fmt.Printf("1. Setup (Preprocessing):    %v (clinetHint: %.2f MB, serverHint: %.2f MB, offline Communication: %.2f MB)\n", setupDuration, clientHintSizeMB, serverHintSizeMB, clientHintSizeMB)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
 	avgA := float64(totalAnswerTime.Nanoseconds()) / float64(numQueries)
