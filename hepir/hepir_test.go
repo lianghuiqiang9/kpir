@@ -40,9 +40,9 @@ func TestHepir(t *testing.T) {
 	for q := uint64(0); q < 10; q++ {
 		targetIndexes := utils.GenRandomIndexes(batchSize, numEntries)
 
-		req, clientState := hepir.Query(targetIndexes)
-		//clientState, EncZero := hepir.QueryOffline(int(batchSize))
-		//req := hepir.QueryOnline(targetIndexes, EncZero)
+		//req, clientState := hepir.Query(targetIndexes)
+		EncZero, clientState := hepir.QueryOffline(batchSize)
+		req := hepir.QueryOnline(targetIndexes, EncZero)
 
 		resp := hepir.Answer(internalDB, req, *serverHint)
 

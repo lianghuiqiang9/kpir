@@ -122,7 +122,7 @@ func (bffkvs *BFFKVS) Encode(kv *utils.KV) utils.EncodedDB {
 		bffkvs.SegmentCountLength[i] = filter.SegmentCountLength
 	}
 	bffkvs.ValueOffsets[count] = currentArrayOffset
-	NumEntries := uint32(utils.NextPerfectSquare(uint64(currentArrayOffset)))
+	NumEntries := uint32(utils.NextPerfectSquare(uint64(currentArrayOffset))) // not only the square, the bff will 1.125 increase the kv size.
 	dbData := make([]uint64, uint64(NumEntries)*W)
 
 	for i := uint64(0); i < count; i++ {

@@ -35,10 +35,11 @@ func (db *EncodedDB) SizeGB() float64 {
 }
 
 func (db *EncodedDB) InitParams(numEntries uint64, bitsPerEntry uint64) {
-	if bitsPerEntry%32 != 0 {
-		fmt.Println("bitsPerVal should be 32 * k")
-		os.Exit(1)
-	}
+	//if bitsPerEntry%32 != 0 {
+	//	fmt.Println("bitsPerVal should be 32 * k")
+	//	os.Exit(1)
+	//}
+
 	uint64PerEntry := (bitsPerEntry + 63) / 64
 
 	db.NumEntries = NextPerfectSquare(numEntries)
@@ -193,10 +194,10 @@ func (b *Bucket) Size() int {
 }
 func (b *Bucket) Setup(totalKeys uint64, bitsPerVal uint64) {
 	b.TotalKeys = totalKeys
-	if (bitsPerVal+32)%64 != 0 {
-		fmt.Println("bitsPerVal should be 32 + 64 * k")
-		os.Exit(1)
-	}
+	//if (bitsPerVal+32)%64 != 0 {
+	//	fmt.Println("bitsPerVal should be 32 + 64 * k")
+	//	os.Exit(1)
+	//}
 	b.Uint64PerVal = (bitsPerVal / 64) + 1
 
 	b.BitsPerVal = bitsPerVal
@@ -387,9 +388,13 @@ func (kv *KV) Setup(totalKeys uint64, BitsPerVal uint64) {
 
 	kv.TotalKeys = totalKeys
 
-	if (BitsPerVal+32)%64 != 0 {
-		fmt.Println("BitsPerVal should be 32 + 64 * k")
-		os.Exit(1)
+	//if (BitsPerVal+32)%64 != 0 {
+	//	fmt.Println("BitsPerVal should be 32 + 64 * k")
+	//	os.Exit(1)
+	//}
+
+	if BitsPerVal%64 > 32 {
+		BitsPerVal = BitsPerVal + 32
 	}
 
 	kv.Uint64PerVal = (BitsPerVal / 64) + 1

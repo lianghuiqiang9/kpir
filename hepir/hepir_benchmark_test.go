@@ -49,7 +49,7 @@ func BenchmarkHepir(b *testing.B) {
 
 	hepir.InitParams(numEntries, bitsPerEntry)
 
-	var totalQueryTime, totalAnswerTime, totalReconTime time.Duration
+	var _, totalOfflineQueryTime, totalOnlineQueryTime, totalAnswerTime, totalReconTime time.Duration
 	var totalQuerySize, totalAnswerSize float64
 	var numQueries uint64 = 10
 
@@ -69,10 +69,22 @@ func BenchmarkHepir(b *testing.B) {
 	for q := uint64(0); q < numQueries; q++ {
 		targetIndexes := utils.GenRandomIndexes(batchSize, numEntries)
 
+		/*
+			// --- B. Query (Client) ---
+			startQuery := time.Now()
+			req, clientState := hepir.Query(targetIndexes)
+			totalQueryTime += time.Since(startQuery)
+			totalQuerySize += float64(req.Size())
+		*/
+
 		// --- B. Query (Client) ---
-		startQuery := time.Now()
-		req, clientState := hepir.Query(targetIndexes)
-		totalQueryTime += time.Since(startQuery)
+		startOfflineQuery := time.Now()
+		EncZero, clientState := hepir.QueryOffline(batchSize)
+		totalOfflineQueryTime += time.Since(startOfflineQuery)
+		startOnlineQuery := time.Now()
+		req := hepir.QueryOnline(targetIndexes, EncZero)
+		totalOnlineQueryTime += time.Since(startOnlineQuery)
+
 		totalQuerySize += float64(req.Size())
 
 		// --- C. Answer (Server) ---
@@ -91,15 +103,16 @@ func BenchmarkHepir(b *testing.B) {
 		}
 	}
 
-	fmt.Printf("SIPIR Name(): %s\n", hepir.Name())
+	fmt.Printf("HEPIR Name(): %s\n", hepir.Name())
 	fmt.Printf("HEPIR Evaluation (%s) Results (N=2^%d)\n", hepir.Name(), logNumEntries)
 	fmt.Printf("1. Setup (Preprocessing):    %v (clinetHint: %.2f MB, serverHint: %.2f MB, offline Communication: %.2f MB)\n", setupDuration, clientHintSizeMB, serverHintSizeMB, clientHintSizeMB)
 
-	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
+	avgOffQ := float64(totalOfflineQueryTime.Nanoseconds()) / float64(numQueries)
+	avgOnQ := float64(totalOnlineQueryTime.Nanoseconds()) / float64(numQueries)
 	avgA := float64(totalAnswerTime.Nanoseconds()) / float64(numQueries)
 	avgR := float64(totalReconTime.Nanoseconds()) / float64(numQueries)
 
-	fmt.Printf("2. Client Query (Avg):       %.2f us (Up: %.2f KB)\n", avgQ/1000, totalQuerySize/float64(numQueries)/1024)
+	fmt.Printf("2. Client Query (Avg):       %.2f + %.2f = %.2f us (Up: %.2f KB)\n", avgOffQ/1000, avgOnQ/1000, (avgOffQ+avgOnQ)/1000, totalQuerySize/float64(numQueries)/1024)
 	fmt.Printf("3. Server Answer (Avg):      %.2f us (Down: %.2f KB)\n", avgA/1000, totalAnswerSize/float64(numQueries)/1024)
 	fmt.Printf("4. Client Reconstruct (Avg): %.2f us\n", avgR/1000)
 

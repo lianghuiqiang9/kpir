@@ -1,4 +1,26 @@
 
+# compare with chalametPIR and KPIR
+
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 256 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 512 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 1024 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 2048 -kvsID "bffkvs" -pirID "simplepir"
+
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 256 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 512 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 1024 -kvsID "bffkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 2048 -kvsID "bffkvs" -pirID "simplepir"
+
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 256 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 512 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 1024 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 20 -bitsPerVal 2048 -kvsID "pthashkvs" -pirID "simplepir"
+
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 256 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 512 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 1024 -kvsID "pthashkvs" -pirID "simplepir"
+go test kpir_benchmark_test.go -bench=BenchmarkKeywordHepir -benchmem -run=none -v -timeout 0 -args -logN 22 -bitsPerVal 2048 -kvsID "pthashkvs" -pirID "simplepir"
+
 # piano with skip with bffkvs
 
 go test kpir_benchmark_test.go -bench=BenchmarkKeywordSipirSkip -benchmem -run=none -v -timeout 0 -args -logN 25 -bitsPerVal 32 -kvsID "bffkvs" -pirID "piano" -type "skip"

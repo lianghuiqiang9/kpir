@@ -302,9 +302,9 @@ func (pi *DoublePIR) Query(indexes []uint64) (Msg, State) {
 	return queries, states
 }
 
-func (pi *DoublePIR) QueryOffline(batchSize uint64) ([]State, []Msg) {
-	states := make([]State, batchSize)
-	msgs := make([]Msg, batchSize)
+func (pi *DoublePIR) QueryOffline(batchSize uint64) (Msg, State) {
+	states := State{}
+	msgs := Msg{}
 
 	info := pi.DBInfo
 	p := pi.Params
@@ -327,8 +327,11 @@ func (pi *DoublePIR) QueryOffline(batchSize uint64) ([]State, []Msg) {
 			query1.AppendZeros(info.Squishing - (p.M % info.Squishing))
 		}
 
-		currState := MakeState(secret1)
-		currMsg := MakeMsg(query1)
+		//currState := MakeState(secret1)
+		//currMsg := MakeMsg(query1)
+		// 1 + ne_x
+		states.Data = append(states.Data, secret1)
+		msgs.Data = append(msgs.Data, query1)
 
 		for j := uint64(0); j < ne_x; j++ {
 			if _, err := rand.Read(seed128[:]); err != nil {
@@ -343,45 +346,47 @@ func (pi *DoublePIR) QueryOffline(batchSize uint64) ([]State, []Msg) {
 				query2.AppendZeros(info.Squishing - ((p.L / info.X) % info.Squishing))
 			}
 
-			currState.Data = append(currState.Data, secret2)
-			currMsg.Data = append(currMsg.Data, query2)
+			states.Data = append(states.Data, secret2)
+			msgs.Data = append(msgs.Data, query2)
 		}
 
-		states[b] = currState
-		msgs[b] = currMsg
+		//states[b] = currState
+		//msgs[b] = currMsg
 	}
 
-	return states, msgs
+	return msgs, states
 }
 
-func (pi *DoublePIR) QueryOnline(indexes []uint64, offlineMsgs []Msg) []Msg {
-	batchSize := len(indexes)
-	if batchSize != len(offlineMsgs) {
-		panic("DoublePIR Online: Batch size mismatch")
-	}
+func (pi *DoublePIR) QueryOnline(indexes []uint64, offlineMsgs Msg) Msg {
+	//batchSize := len(indexes)
+	//if batchSize != len(offlineMsgs) {
+	//	panic("DoublePIR Online: Batch size mismatch")
+	//}
 
-	onlineMsgs := make([]Msg, batchSize)
+	onlineMsgs := Msg{}
 	info := pi.DBInfo
 	p := pi.Params
 	delta := p.Delta()
 	ne_x := info.Ne / info.X
 
-	for b, idx := range indexes {
-		query1 := offlineMsgs[b].Data[0]
+	for i, idx := range indexes {
+		offset0 := (1 + ne_x) * uint64(i)
+		query1 := offlineMsgs.Data[offset0]
 		i2 := idx % p.M
 		query1.Data[i2] += C.Elem(delta)
 
-		currMsg := MakeMsg(query1)
+		//currMsg := MakeMsg(query1)
+		onlineMsgs.Data = append(onlineMsgs.Data, query1)
 
 		i1_base := (idx / p.M) * ne_x
 		for j := uint64(0); j < ne_x; j++ {
-			query2 := offlineMsgs[b].Data[j+1]
+			query2 := offlineMsgs.Data[offset0+j+1]
 			query2.Data[i1_base+j] += C.Elem(delta)
 
-			currMsg.Data = append(currMsg.Data, query2)
+			onlineMsgs.Data = append(onlineMsgs.Data, query2)
 		}
 
-		onlineMsgs[b] = currMsg
+		//onlineMsgs.Data = append(onlineMsgs.Data, currMsg)
 	}
 
 	return onlineMsgs

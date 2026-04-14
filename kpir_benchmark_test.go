@@ -289,7 +289,7 @@ func BenchmarkKeywordHepir(b *testing.B) {
 	serverHint, clientHint := hepir.Setup(internalDB)
 	setupDuration := time.Since(start)
 
-	var tMapping, tQuery, tServer, tRecon, tDecode time.Duration
+	var tMapping, tOffQuery, tOnQuery, tServer, tRecon, tDecode time.Duration
 	var upMsgSize, downMsgSize float64
 	num := 0.0
 
@@ -306,9 +306,17 @@ func BenchmarkKeywordHepir(b *testing.B) {
 		tMapping += time.Since(t1)
 
 		// B. Query Gen (Client)
-		t2 := time.Now()
-		req, clientState := hepir.Query(targetIndexes)
-		tQuery += time.Since(t2)
+		//t2 := time.Now()
+		//req, clientState := hepir.Query(targetIndexes)
+		//tQuery += time.Since(t2)
+
+		t21 := time.Now()
+		EncZero, clientState := hepir.QueryOffline(uint64(len(targetIndexes)))
+		tOffQuery += time.Since(t21)
+		t22 := time.Now()
+		req := hepir.QueryOnline(targetIndexes, EncZero)
+		tOnQuery += time.Since(t22)
+
 		upMsgSize += float64(req.Size())
 
 		// C. Server Answer (Server)
@@ -340,13 +348,12 @@ func BenchmarkKeywordHepir(b *testing.B) {
 	fmt.Printf("OFFLINE OVERHEAD:\n")
 	fmt.Printf("  - Encode DB:     %v\n", encodeDuration)
 	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v, offline Communication: %.4f MB\n", setupDuration, encodeDuration+setupDuration, float64(clientHint.Size()+kvs.Size())/(1024*1024))
-	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v\n", setupDuration, encodeDuration+setupDuration)
 	fmt.Printf("  - Hint Storage:   KVS: %.4f KB, Client: %.4f MB (all %.4f MB), Server: %.2f MB\n",
 		float64(kvs.Size())/1024, float64(clientHint.Size())/(1024*1024), float64(kvs.Size()+clientHint.Size())/(1024*1024), float64(serverHint.Size())/(1024*1024))
 
 	fmt.Printf("\nONLINE LATENCY (Average over %.0f runs):\n", num)
 	fmt.Printf("  1. Mapping (KVS Index):   %8.4f us\n", float64(tMapping.Nanoseconds())/num/1000)
-	fmt.Printf("  2. PIR Query Gen:         %8.4f us (Up: %.4f KB)\n", float64(tQuery.Nanoseconds())/num/1000, upMsgSize/num/1024)
+	fmt.Printf("  2. PIR Query Gen:         %8.4f + %8.4f = %8.4f us (Up: %.4f KB)\n", float64(tOffQuery.Nanoseconds())/num/1000, float64(tOnQuery.Nanoseconds())/num/1000, float64((tOffQuery+tOnQuery).Nanoseconds())/num/1000, upMsgSize/num/1024)
 	fmt.Printf("  3. Server Answer:         %8.4f us (Down: %.4f KB)\n", float64(tServer.Nanoseconds())/num/1000, downMsgSize/num/1024)
 	fmt.Printf("  4. Reconstruct:           %8.4f us\n", float64(tRecon.Nanoseconds())/num/1000)
 	fmt.Printf("  5. KVS Decode:            %8.4f us, all reconstruct and decode %8.4f\n", float64(tDecode.Nanoseconds())/num/1000, float64(tRecon.Nanoseconds()+tDecode.Nanoseconds())/num/1000)
