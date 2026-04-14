@@ -5,7 +5,6 @@ import (
 )
 
 type HEPIR interface {
-	// 基础配置
 	InitParams(N, bitsPerEntry uint64) Params
 	Name() string
 
