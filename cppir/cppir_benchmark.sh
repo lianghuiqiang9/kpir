@@ -1,5 +1,5 @@
 
-# SIPIR
+# CPPIR
 
 # Piano
 go test -bench=BenchmarkSkip -benchmem -run=none -v -timeout 0 -args -logN=25 -bitsPerEntry=32 -batch=1 -type="skip" -pirID="piano"
@@ -27,7 +27,7 @@ go test -bench=BenchmarkRewind -benchmem -run=none -v -timeout 0 -args -logN=25 
 go test -bench=BenchmarkRewind -benchmem -run=none -v -timeout 0 -args -logN=25 -bitsPerEntry=192 -batch=1 -type="rewind" -pirID="singleserver"
 go test -bench=BenchmarkRewind -benchmem -run=none -v -timeout 0 -args -logN=25 -bitsPerEntry=256 -batch=1 -type="rewind" -pirID="singleserver"
 
-# Batch SIPIR
+# Batch CPPIR
 
 # Piano with Skip
 go test -bench=BenchmarkSkip -benchmem -run=none -v -timeout 0 -args -logN=25 -bitsPerEntry=32 -batch=3 -type="skip" -pirID="piano"

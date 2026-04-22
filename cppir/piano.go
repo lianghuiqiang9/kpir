@@ -1,4 +1,4 @@
-package sipir
+package cppir
 
 import (
 	"encoding/binary"

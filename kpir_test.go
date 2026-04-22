@@ -5,9 +5,9 @@ import (
 	"math/rand/v2"
 	"testing"
 
+	"github.com/local/cppir"
 	"github.com/local/hepir/simplepir"
 	"github.com/local/kvs"
-	"github.com/local/sipir"
 	"github.com/local/utils"
 )
 
@@ -18,7 +18,7 @@ func TestKeywordSipirRewind(t *testing.T) {
 
 	//saveToDisk := false
 	batchtype := "rewind"
-	sipir := sipir.SinglePass{} //Piano{} //SingleServer{} //SinglePass{}
+	cppir := cppir.SinglePass{} //Piano{} //SingleServer{} //SinglePass{}
 	kvs := kvs.NewBBHashKVS()   //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
 	defer kvs.Free()
 
@@ -29,13 +29,13 @@ func TestKeywordSipirRewind(t *testing.T) {
 	kv.Sort()
 	db := kvs.Encode(kv)
 
-	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
-	sipir.GenerateHint(&db)
+	cppir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
+	cppir.GenerateHint(&db)
 
 	batchSize := kvs.BatchSize
-	fmt.Println("batchSize: ", batchSize, " sipir.Params.Q: ", sipir.Params.Q)
+	fmt.Println("batchSize: ", batchSize, " cppir.Params.Q: ", cppir.Params.Q)
 
-	for q := uint64(0); q < sipir.Params.Q/batchSize; q++ {
+	for q := uint64(0); q < cppir.Params.Q/batchSize; q++ {
 
 		outkey := rand.Uint64() % kv.BucketCount
 		innkeyIndex := rand.Uint64() % kv.Buckets[outkey].TotalKeys
@@ -45,25 +45,25 @@ func TestKeywordSipirRewind(t *testing.T) {
 
 		// Batch IndexPIR Start
 
-		req, state := sipir.QueryAndFakeRefresh(targetIndexes)
+		req, state := cppir.QueryAndFakeRefresh(targetIndexes)
 
-		resp := sipir.Answer(&db, req)
+		resp := cppir.Answer(&db, req)
 
 		//rewind
-		sipir.Rewind(state)
+		cppir.Rewind(state)
 
-		results := sipir.ReconstructAndRefresh(resp, state, targetIndexes)
+		results := cppir.ReconstructAndRefresh(resp, state, targetIndexes)
 		// Batch IndexPIR End
 
 		val, _ := kvs.Decode(innkey, results)
 
 		_, march := kv.GetValAndComp(outkey, innkey, val)
 		if !march {
-			fmt.Println("Keyword SIPIR Failed")
+			fmt.Println("Keyword CPPIR Failed")
 		}
 
 	}
-	fmt.Println("Keyword SIPIR finished successfully")
+	fmt.Println("Keyword CPPIR finished successfully")
 }
 
 // go test kpir_test.go -v -run TestKeywordSipirSkip
@@ -73,7 +73,7 @@ func TestKeywordSipirSkip(t *testing.T) {
 
 	//saveToDisk := false
 	batchtype := "skip"
-	sipir := sipir.Piano{}
+	cppir := cppir.Piano{}
 	kvs := kvs.NewPTHashKVS() //BFFKVS{} // NewConsensusRecSplitKVS() //NewPTHashKVS() //NewBBHashKVS()
 	defer kvs.Free()
 
@@ -84,13 +84,13 @@ func TestKeywordSipirSkip(t *testing.T) {
 	kv.Sort()
 	db := kvs.Encode(kv)
 
-	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
-	sipir.GenerateHint(&db)
+	cppir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
+	cppir.GenerateHint(&db)
 
 	batchSize := kvs.BatchSize
-	fmt.Println("batchSize: ", batchSize, " sipir.Params.Q: ", sipir.Params.Q)
+	fmt.Println("batchSize: ", batchSize, " cppir.Params.Q: ", cppir.Params.Q)
 
-	for q := uint64(0); q < sipir.Params.Q/batchSize; q++ {
+	for q := uint64(0); q < cppir.Params.Q/batchSize; q++ {
 		outkey := rand.Uint64() % kv.BucketCount
 		innkeyIndex := rand.Uint64() % kv.Buckets[outkey].TotalKeys
 		innkey := kv.Buckets[outkey].Keys[innkeyIndex]
@@ -99,13 +99,13 @@ func TestKeywordSipirSkip(t *testing.T) {
 
 		// Batch IndexPIR Start
 
-		req, state := sipir.Query(targetIndexes)
+		req, state := cppir.Query(targetIndexes)
 
-		resp := sipir.Answer(&db, req)
+		resp := cppir.Answer(&db, req)
 
-		results := sipir.Reconstruct(resp, state)
+		results := cppir.Reconstruct(resp, state)
 
-		sipir.Refresh(targetIndexes, results, state)
+		cppir.Refresh(targetIndexes, results, state)
 
 		// Batch IndexPIR End
 
@@ -113,11 +113,11 @@ func TestKeywordSipirSkip(t *testing.T) {
 
 		_, march := kv.GetValAndComp(outkey, innkey, val)
 		if !march {
-			fmt.Println("Keyword SIPIR Failed")
+			fmt.Println("Keyword CPPIR Failed")
 		}
 	}
 
-	fmt.Println("Keyword SIPIR finished successfully")
+	fmt.Println("Keyword CPPIR finished successfully")
 
 }
 

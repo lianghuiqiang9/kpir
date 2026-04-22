@@ -1,4 +1,4 @@
-package sipir
+package cppir
 
 import "github.com/local/utils"
 
@@ -18,7 +18,7 @@ type State interface {
 	Print() string
 }
 
-type SIPIR interface {
+type CPPIR interface {
 	Name() string
 
 	InitParams(numEntries uint64, bitsPerEntry uint64, Type string)
@@ -35,7 +35,7 @@ type SIPIR interface {
 
 	//Refresh(indexes []uint64, answers [][]uint64, st State)
 
-	//SaveHintState() SIPIR
+	//SaveHintState() CPPIR
 
 	QueryAndFakeRefresh(indexes []uint64) (req Message, st State)
 

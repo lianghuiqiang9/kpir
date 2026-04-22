@@ -7,7 +7,7 @@ replace (
 	github.com/local/consensusrecsplit => ./kvs/consensusrecsplit
 	github.com/local/hepir/simplepir => ./hepir/simplepir
 	github.com/local/kvs => ./kvs
-	github.com/local/sipir => ./sipir
+	github.com/local/cppir => ./cppir
 	github.com/local/utils => ./utils
 	github.com/local/bbhash => ./kvs/bbhash
 	github.com/local/pthash => ./kvs/pthash
@@ -16,7 +16,7 @@ replace (
 require (
 	github.com/local/hepir/simplepir v0.0.0-00010101000000-000000000000
 	github.com/local/kvs v0.0.0-00010101000000-000000000000
-	github.com/local/sipir v0.0.0-00010101000000-000000000000
+	github.com/local/cppir v0.0.0-00010101000000-000000000000
 	github.com/local/utils v0.0.0-00010101000000-000000000000
 	github.com/FastFilter/xorfilter v0.0.0-00010101000000-000000000000 // indirect
 	github.com/local/bbhash v0.0.0-00010101000000-000000000000 // indirect

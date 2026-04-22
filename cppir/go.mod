@@ -1,4 +1,4 @@
-module sipir
+module cppir
 
 go 1.24.11
 

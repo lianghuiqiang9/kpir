@@ -1,8 +1,8 @@
 bash kpir_benchmark.sh
 
-cd sipir
+cd cppir
 
-bash sipir_benchmark.sh
+bash cppir_benchmark.sh
 
 cd ..
 cd hepir

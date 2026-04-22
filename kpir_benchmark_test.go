@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/local/cppir"
 	"github.com/local/hepir/simplepir"
 	KVS "github.com/local/kvs"
-	"github.com/local/sipir"
 	"github.com/local/utils"
 )
 
@@ -32,15 +32,15 @@ func init() {
 // go test kpir_benchmark_test.go -bench=BenchmarkKeywordSipirRewind -benchmem -run=none -v
 func BenchmarkKeywordSipirRewind(b *testing.B) {
 
-	var pir sipir.SIPIR
+	var pir cppir.CPPIR
 
 	switch pirID {
 	case "piano":
-		pir = &sipir.Piano{}
+		pir = &cppir.Piano{}
 	case "singleserver":
-		pir = &sipir.SingleServer{}
+		pir = &cppir.SingleServer{}
 	case "singlepass":
-		pir = &sipir.SinglePass{}
+		pir = &cppir.SinglePass{}
 	default:
 		b.Fatalf("error Scheme: piano, singleserver, singlepass")
 	}
@@ -83,7 +83,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 	num := 0.0
 	maxQueries := pir.GetParamQ() / batchSize
 
-	fmt.Println("********* Keyword SIPIR (Rewind) Benchmark Start **********")
+	fmt.Println("********* Keyword CPPIR (Rewind) Benchmark Start **********")
 
 	for q := uint64(0); q < maxQueries; q++ {
 
@@ -118,7 +118,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 
 		_, march := kv.GetValAndComp(outkey, innkey, val)
 		if !march {
-			fmt.Println("Keyword SIPIR Failed")
+			fmt.Println("Keyword CPPIR Failed")
 		}
 		num++
 	}
@@ -142,7 +142,7 @@ func BenchmarkKeywordSipirRewind(b *testing.B) {
 // go test kpir_benchmark_test.go -bench=BenchmarkKeywordSipirSkip -benchmem -v
 func BenchmarkKeywordSipirSkip(b *testing.B) {
 
-	sipir := &sipir.Piano{}
+	cppir := &cppir.Piano{}
 
 	var kvs KVS.KVS
 
@@ -173,8 +173,8 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 	encodeDuration := time.Since(start)
 
 	start = time.Now()
-	sipir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
-	sipir.GenerateHint(&db)
+	cppir.InitParams(db.NumEntries, db.BitsPerEntry, batchtype)
+	cppir.GenerateHint(&db)
 	genHintDuration := time.Since(start)
 
 	batchSize := kvs.GetBatchSize()
@@ -183,9 +183,9 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 	var upMsgSize, downMsgSize float64
 	num := 0.0
 
-	maxQueries := sipir.Params.Q / batchSize
+	maxQueries := cppir.Params.Q / batchSize
 
-	fmt.Println("********* Keyword SIPIR (Skip) Benchmark Start **********")
+	fmt.Println("********* Keyword CPPIR (Skip) Benchmark Start **********")
 
 	for q := uint64(0); q < maxQueries; q++ {
 		outkey, innkey := kv.GenRandomKey()
@@ -197,20 +197,20 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 
 		// B. Query Gen (Client)
 		t2 := time.Now()
-		req, state := sipir.Query(targetIndexes)
+		req, state := cppir.Query(targetIndexes)
 		tQuery += time.Since(t2)
 		upMsgSize += float64(req.Size())
 
 		// C. Server Answer (Server)
 		t3 := time.Now()
-		resp := sipir.Answer(&db, req)
+		resp := cppir.Answer(&db, req)
 		tServer += time.Since(t3)
 		downMsgSize += float64(resp.Size())
 
 		// D. Reconstruct (Client)
 		t4 := time.Now()
-		results := sipir.Reconstruct(resp, state)
-		sipir.Refresh(targetIndexes, results, state)
+		results := cppir.Reconstruct(resp, state)
+		cppir.Refresh(targetIndexes, results, state)
 		tReconAndRefresh += time.Since(t4)
 
 		// E. Final Decode (Client)
@@ -220,17 +220,17 @@ func BenchmarkKeywordSipirSkip(b *testing.B) {
 
 		_, march := kv.GetValAndComp(outkey, innkey, val)
 		if !march {
-			fmt.Println("Keyword SIPIR Failed")
+			fmt.Println("Keyword CPPIR Failed")
 		}
 		num++
 	}
 
-	fmt.Printf("Keyword PIR Benchmark (%s + %s + %s, N=2^%d, w=%d)\n", sipir.Name(), batchtype, kvs.Name(), logNumsKeys, bitsPerVal)
+	fmt.Printf("Keyword PIR Benchmark (%s + %s + %s, N=2^%d, w=%d)\n", cppir.Name(), batchtype, kvs.Name(), logNumsKeys, bitsPerVal)
 
 	fmt.Printf("OFFLINE OVERHEAD:\n")
 	fmt.Printf("  - Encode DB:     %v\n", encodeDuration)
 	fmt.Printf("  - Generate Hint:  %v, overall Setup time:  %v, offline Communication: %.4f MB\n", genHintDuration, encodeDuration+genHintDuration, float64(db.Size()+kvs.Size())/(1024*1024))
-	fmt.Printf("  - Hint Storage:  KVS: %.4f KB, PIR: %.4f KB, overall Client hint size: %.4f MB\n", float64(kvs.Size())/1024, float64(sipir.Hint.Size())/1024, (float64(kvs.Size())+sipir.Hint.Size())/1024/1024)
+	fmt.Printf("  - Hint Storage:  KVS: %.4f KB, PIR: %.4f KB, overall Client hint size: %.4f MB\n", float64(kvs.Size())/1024, float64(cppir.Hint.Size())/1024, (float64(kvs.Size())+cppir.Hint.Size())/1024/1024)
 
 	fmt.Printf("\nONLINE LATENCY (Average over %.0f runs):\n", num)
 	fmt.Printf("  1. Mapping (KVS Index):   %8.4f us\n", float64(tMapping.Nanoseconds())/num/1000)

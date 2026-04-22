@@ -34,8 +34,8 @@ cd hepir
 bash hepir_benchmark.sh
 
 cd ..
-cd sipir
-bash sipir_benchmark.sh
+cd cppir
+bash cppir_benchmark.sh
 
 cd ..
 bash kpir_benchmark.sh

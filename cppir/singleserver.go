@@ -1,4 +1,4 @@
-package sipir
+package cppir
 
 import (
 	rrand "crypto/rand"

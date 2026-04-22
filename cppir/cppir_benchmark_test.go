@@ -1,4 +1,4 @@
-package sipir
+package cppir
 
 import (
 	"flag"
@@ -34,13 +34,13 @@ func BenchmarkSkip(b *testing.B) {
 		flag.Parse()
 	}
 
-	sipir := Piano{}
+	cppir := Piano{}
 
 	db := utils.EncodedDB{}
 	numEntries := uint64(1 << logNumEntries)
 
 	db.InitParams(numEntries, bitsPerEntry)
-	sipir.InitParams(numEntries, bitsPerEntry, batchtype)
+	cppir.InitParams(numEntries, bitsPerEntry, batchtype)
 	db.Random()
 
 	dbSizeMB := float64(db.Size()) / (1024 * 1024)
@@ -51,43 +51,43 @@ func BenchmarkSkip(b *testing.B) {
 
 	// --- A. Preprocessing (GenerateHint) ---
 	startHint := time.Now()
-	sipir.GenerateHint(&db)
+	cppir.GenerateHint(&db)
 	generateHintDuration := time.Since(startHint)
-	hintSizeMB := float64(sipir.Hint.Size()) / (1024 * 1024)
+	hintSizeMB := float64(cppir.Hint.Size()) / (1024 * 1024)
 
-	fmt.Println("********* SIPIR Batch Query Start **********")
+	fmt.Println("********* CPPIR Batch Query Start **********")
 
-	maxQueries := sipir.Params.Q / batchSize
+	maxQueries := cppir.Params.Q / batchSize
 
 	for q := uint64(0); q < maxQueries; q++ {
 		targetIndexes := utils.GenRandomIndexes(batchSize, numEntries)
 
 		// --- B. Query (Client) ---
 		startQuery := time.Now()
-		req, state := sipir.Query(targetIndexes)
+		req, state := cppir.Query(targetIndexes)
 		totalQueryTime += time.Since(startQuery)
 		totalQuerySize += float64(req.Size())
 
 		// --- C. Answer (Server) ---
 		startAnswer := time.Now()
-		resp := sipir.Answer(&db, req)
+		resp := cppir.Answer(&db, req)
 		totalAnswerTime += time.Since(startAnswer)
 		totalAnswerSize += float64(resp.Size())
 
 		// --- D. Reconstruct & Refresh (Client) ---
 		startRecon := time.Now()
-		results := sipir.Reconstruct(resp, state)
-		sipir.Refresh(targetIndexes, results, state)
+		results := cppir.Reconstruct(resp, state)
+		cppir.Refresh(targetIndexes, results, state)
 		totalReconTime += time.Since(startRecon)
 
 		if !db.BatchEntryEqualsData(targetIndexes, results) {
-			fmt.Println("SIPIR Batch PIR Failed at query", q)
+			fmt.Println("CPPIR Batch PIR Failed at query", q)
 		}
 		numQueries++
 	}
 
-	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
-	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
+	fmt.Printf("CPPIR Name(): %s, batchtype: %s\n", cppir.Name(), batchtype)
+	fmt.Printf("CPPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
 	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB, Offline Communication: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, dbSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
@@ -106,15 +106,15 @@ func BenchmarkRewind(b *testing.B) {
 		flag.Parse()
 	}
 
-	var sipir SIPIR
+	var cppir CPPIR
 
 	switch pirID {
 	case "piano":
-		sipir = &Piano{}
+		cppir = &Piano{}
 	case "singleserver":
-		sipir = &SingleServer{}
+		cppir = &SingleServer{}
 	case "singlepass":
-		sipir = &SinglePass{}
+		cppir = &SinglePass{}
 	default:
 		b.Fatalf("error Scheme: piano, singleserver, singlepass")
 	}
@@ -123,7 +123,7 @@ func BenchmarkRewind(b *testing.B) {
 
 	db := utils.EncodedDB{}
 	db.InitParams(numEntries, bitsPerEntry)
-	sipir.InitParams(numEntries, bitsPerEntry, batchtype)
+	cppir.InitParams(numEntries, bitsPerEntry, batchtype)
 	db.Random()
 
 	dbSizeMB := float64(db.Size()) / (1024 * 1024)
@@ -134,43 +134,43 @@ func BenchmarkRewind(b *testing.B) {
 
 	// --- A. Preprocessing (GenerateHint) ---
 	startHint := time.Now()
-	sipir.GenerateHint(&db)
+	cppir.GenerateHint(&db)
 	generateHintDuration := time.Since(startHint)
-	hintSizeMB := sipir.GetHintSize() / (1024 * 1024)
+	hintSizeMB := cppir.GetHintSize() / (1024 * 1024)
 
-	fmt.Println("********* SIPIR Batch Query Start **********")
+	fmt.Println("********* CPPIR Batch Query Start **********")
 
-	maxQueries := sipir.GetParamQ() / batchSize
+	maxQueries := cppir.GetParamQ() / batchSize
 
 	for q := uint64(0); q < maxQueries; q++ {
 		targetIndexes := utils.GenRandomIndexes(batchSize, numEntries)
 
 		// --- B. Query (Client) ---
 		startQuery := time.Now()
-		req, state := sipir.QueryAndFakeRefresh(targetIndexes)
+		req, state := cppir.QueryAndFakeRefresh(targetIndexes)
 		totalQueryTime += time.Since(startQuery)
 		totalQuerySize += float64(req.Size())
 
 		// --- C. Answer (Server) ---
 		startAnswer := time.Now()
-		resp := sipir.Answer(&db, req)
+		resp := cppir.Answer(&db, req)
 		totalAnswerTime += time.Since(startAnswer)
 		totalAnswerSize += float64(resp.Size())
 
 		// --- D. Reconstruct & Refresh (Client) ---
 		startRecon := time.Now()
-		sipir.Rewind(state)
-		results := sipir.ReconstructAndRefresh(resp, state, targetIndexes)
+		cppir.Rewind(state)
+		results := cppir.ReconstructAndRefresh(resp, state, targetIndexes)
 		totalReconTime += time.Since(startRecon)
 
 		if !db.BatchEntryEqualsData(targetIndexes, results) {
-			fmt.Println("SIPIR Batch PIR Failed at query", q)
+			fmt.Println("CPPIR Batch PIR Failed at query", q)
 		}
 		numQueries++
 	}
 
-	fmt.Printf("SIPIR Name(): %s, batchtype: %s\n", sipir.Name(), batchtype)
-	fmt.Printf("SIPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
+	fmt.Printf("CPPIR Name(): %s, batchtype: %s\n", cppir.Name(), batchtype)
+	fmt.Printf("CPPIR Evaluation Results (N=2^%d, w=%d, Batch=%d)\n", logNumEntries, bitsPerEntry, batchSize)
 	fmt.Printf("1. Preprocessing (Hint Gen): %v (Size: %.4f MB, Offline Communication: %.4f MB), maxQuery: %d\n", generateHintDuration, hintSizeMB, dbSizeMB, maxQueries)
 
 	avgQ := float64(totalQueryTime.Nanoseconds()) / float64(numQueries)
